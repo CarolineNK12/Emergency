@@ -71,28 +71,8 @@ def init_db():
                 })
 
             question_count = conn.execute(text("SELECT COUNT(*) FROM Questions")).fetchone()[0]
-            if question_count == 0:
-                conn.execute(text("""
-                    INSERT INTO Questions (
-                        id,
-                        question,
-                        answer1,
-                        answer2,
-                        answer3,
-                        answer4,
-                        realanswer,
-                        successmessage
-                    ) VALUES (
-                        :id,
-                        :question,
-                        :answer1,
-                        :answer2,
-                        :answer3,
-                        :answer4,
-                        :realanswer,
-                        :successmessage
-                    )
-                """), {
+            seed_questions = [
+                {
                     "id": 1,
                     "question": "Oh no! You witness a car accident on the street. What is the universal emergency number to call in Indonesia?",
                     "answer1": "911",
@@ -101,7 +81,181 @@ def init_db():
                     "answer4": "000",
                     "realanswer": "112",
                     "successmessage": "Spot on! 112 is Indonesia's universal SOS number. Leave 911 for the movies!",
-                })
+                },
+                {
+                    "id": 2,
+                    "question": "What is the correct ratio of chest compressions to rescue breaths for high-quality adult CPR?",
+                    "answer1": "15 compressions to 2 breaths",
+                    "answer2": "30 compressions to 5 breaths",
+                    "answer3": "30 compressions to 2 breaths",
+                    "answer4": "5 compressions to 1 breath",
+                    "realanswer": "30 compressions to 2 breaths",
+                    "successmessage": "Correct! The gold standard ratio is 30 compressions followed by 2 breaths.",
+                },
+                {
+                    "id": 3,
+                    "question": "What depth should you aim for when performing chest compressions on an adult?",
+                    "answer1": "At least 2 inches (5 cm)",
+                    "answer2": "No more than 1 inch (2.5 cm)",
+                    "answer3": "Exactly 3 inches (7.5 cm)",
+                    "answer4": "Around 1.5 inches (4 cm)",
+                    "realanswer": "At least 2 inches (5 cm)",
+                    "successmessage": "Spot on! Compressions must be at least 2 inches deep to effectively pump blood.",
+                },
+                {
+                    "id": 4,
+                    "question": "A conscious adult is choking and cannot speak. Where should you position your hands for abdominal thrusts?",
+                    "answer1": "Directly on the breastbone",
+                    "answer2": "Slightly above the navel and below the breastbone",
+                    "answer3": "On the lower ribcage",
+                    "answer4": "Directly over the belly button",
+                    "realanswer": "Slightly above the navel and below the breastbone",
+                    "successmessage": "Great job! Placing your hands just above the navel forces the diaphragm upward to expel the object.",
+                },
+                {
+                    "id": 5,
+                    "question": "A victim has a deep laceration on their forearm that is spurting bright red blood. What is your immediate priority?",
+                    "answer1": "Apply a loose bandage over the wound",
+                    "answer2": "Elevate the limb above the heart without touching it",
+                    "answer3": "Apply firm, direct pressure with a clean cloth",
+                    "answer4": "Wash the wound out with running water",
+                    "realanswer": "Apply firm, direct pressure with a clean cloth",
+                    "successmessage": "Correct! Direct pressure is the fastest and most efficient way to control severe bleeding.",
+                },
+                {
+                    "id": 6,
+                    "question": "If blood soaks completely through the initial dressing you applied to a severe wound, what should you do?",
+                    "answer1": "Remove the soaked dressing and start over",
+                    "answer2": "Place additional dressings right on top and keep applying pressure",
+                    "answer3": "Clean the wound with antiseptic",
+                    "answer4": "Apply a tourniquet immediately below the wound",
+                    "realanswer": "Place additional dressings right on top and keep applying pressure",
+                    "successmessage": "Exactly! Never remove the original dressing, as doing so tears away starting blood clots.",
+                },
+                {
+                    "id": 7,
+                    "question": "A trauma victim is pale, cold, clammy, and breathing rapidly (shock). How should you position them?",
+                    "answer1": "Sit them upright in a chair",
+                    "answer2": "Lay them flat on their back and elevate legs slightly if safe",
+                    "answer3": "Place them face down",
+                    "answer4": "Keep them standing and walking around",
+                    "realanswer": "Lay them flat on their back and elevate legs slightly if safe",
+                    "successmessage": "Correct! Laying them flat and elevating their feet helps direct blood flow back to vital core organs.",
+                },
+                {
+                    "id": 8,
+                    "question": "A coworker tells you they feel dizzy and think they are going to faint. What should you advise them to do?",
+                    "answer1": "Sit or lay down immediately on the ground",
+                    "answer2": "Drink a hot beverage rapidly",
+                    "answer3": "Stand up straight and take deep breaths",
+                    "answer4": "Walk outside into the fresh air",
+                    "realanswer": "Sit or lay down immediately on the ground",
+                    "successmessage": "Perfect! Getting them low to the ground early prevents sudden injuries from a fall.",
+                },
+                {
+                    "id": 9,
+                    "question": "What is the medical term used to describe a temporary loss of consciousness caused by a fall in blood pressure?",
+                    "answer1": "Vertigo",
+                    "answer2": "Syncope",
+                    "answer3": "Stroke",
+                    "answer4": "Hypothermia",
+                    "realanswer": "Syncope",
+                    "successmessage": "Brilliant! Syncope is the official clinical term for fainting.",
+                },
+                {
+                    "id": 10,
+                    "question": "A kitchen worker spills boiling water on their arm. The skin is red and blisters are forming. What burn grade is this?",
+                    "answer1": "First-degree burn",
+                    "answer2": "Second-degree burn",
+                    "answer3": "Third-degree burn",
+                    "answer4": "Full-thickness burn",
+                    "realanswer": "Second-degree burn",
+                    "successmessage": "Correct! Blistering indicates a second-degree burn.",
+                },
+                {
+                    "id": 11,
+                    "question": "When applying a splint to a suspected broken bone in the forearm, how should the splint be secured?",
+                    "answer1": "Tie it directly over the break point tightly",
+                    "answer2": "Secure it loose enough to let the bone move freely",
+                    "answer3": "Immobilize the joints both above and below the fracture site",
+                    "answer4": "Wrap it entirely in ice packs before tying",
+                    "realanswer": "Immobilize the joints both above and below the fracture site",
+                    "successmessage": "Spot on! Immobilizing the joints above and below prevents the broken bone segments from shifting.",
+                },
+                {
+                    "id": 12,
+                    "question": "You suspect someone has accidentally swallowed a toxic household cleaning chemical. What is your immediate action?",
+                    "answer1": "Induce vomiting right away",
+                    "answer2": "Give them large amounts of water to drink immediately",
+                    "answer3": "Call emergency services or poison control immediately",
+                    "answer4": "Administer activated charcoal from your kit",
+                    "realanswer": "Call emergency services or poison control immediately",
+                    "successmessage": "Correct! Never induce vomiting without professional guidance, as corrosive chemicals can double damage coming back up.",
+                },
+                {
+                    "id": 13,
+                    "question": "If a toxic chemical splashes directly into someone's eyes, how long should you flush them with clean water?",
+                    "answer1": "At least 5 minutes",
+                    "answer2": "At least 10 minutes",
+                    "answer3": "At least 20 minutes",
+                    "answer4": "Just wipe it with a clean towel",
+                    "realanswer": "At least 20 minutes",
+                    "successmessage": "Excellent! Continuous irrigation for at least 20 minutes is critical to dilute the contaminant.",
+                },
+                {
+                    "id": 14,
+                    "question": "An automated external defibrillator (AED) arrives during CPR. What is the very first thing you do with it?",
+                    "answer1": "Plug in the electrode pads connector",
+                    "answer2": "Turn on the AED power switch",
+                    "answer3": "Apply the pads to the victim's bare chest",
+                    "answer4": "Clear everyone away from the patient",
+                    "realanswer": "Turn on the AED power switch",
+                    "successmessage": "Correct! Turn it on first so the audio voice prompts can guide you safely through the remaining steps.",
+                },
+                {
+                    "id": 15,
+                    "question": "What acronym is universally used to identify the warning signs of a Stroke?",
+                    "answer1": "R.I.C.E.",
+                    "answer2": "F.A.S.T.",
+                    "answer3": "P.A.S.S.",
+                    "answer4": "C.A.B.D.",
+                    "realanswer": "F.A.S.T.",
+                    "successmessage": "Perfect! Face, Arm, Speech, Time (F.A.S.T.) saves critical time during a stroke emergency.",
+                },
+                {
+                    "id": 16,
+                    "question": "You are treating a heat stroke victim whose skin is hot, red, and dry. Which treatment is the most critical?",
+                    "answer1": "Provide a sugary sports beverage to sip",
+                    "answer2": "Rapidly cool the body using cold water immersion or ice packs",
+                    "answer3": "Administer aspirin",
+                    "answer4": "Cover them with a heavy blanket to sweat it out",
+                    "realanswer": "Rapidly cool the body using cold water immersion or ice packs",
+                    "successmessage": "Outstanding! Heat stroke is a true medical emergency; cooling their core temperature takes absolute priority.",
+                },
+            ]
+            if question_count < len(seed_questions):
+                for row in seed_questions:
+                    conn.execute(text("""
+                        INSERT OR IGNORE INTO Questions (
+                            id,
+                            question,
+                            answer1,
+                            answer2,
+                            answer3,
+                            answer4,
+                            realanswer,
+                            successmessage
+                        ) VALUES (
+                            :id,
+                            :question,
+                            :answer1,
+                            :answer2,
+                            :answer3,
+                            :answer4,
+                            :realanswer,
+                            :successmessage
+                        )
+                    """), row)
 
             conn.commit()
         return True
