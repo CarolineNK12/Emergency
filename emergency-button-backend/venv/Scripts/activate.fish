@@ -33,7 +33,8 @@ end
 # Unset irrelevant variables.
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV 'C:\Users\Carol\Emergency\Emergency\emergency-button-backend\venv'
+set script_dir (path dirname (status filename))
+set -gx VIRTUAL_ENV (realpath "$script_dir/..")
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/"Scripts $PATH
