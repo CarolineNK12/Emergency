@@ -6,6 +6,9 @@ function Alerts() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
+  // An array of distances to cycle through dynamically
+  const mockDistances = ['4.5km', '1.2km', '8.0km', '0.5km', '12km'];
+
   useEffect(() => {
     const controller = new AbortController()
 
@@ -49,12 +52,15 @@ function Alerts() {
       {error && <p className="alerts-status alerts-status--error">{error}</p>}
 
       <div className="alerts-list">
-        {alerts.map((alert) => (
+        {alerts.map((alert, index) => (
           <article key={alert.id} className="alerts-card">
             <div className="alerts-card__top">
               <div>
                 <h2>{alert.name}</h2>
-                <p className="alerts-area">{alert.area || 'Area not listed'}</p>
+                {/* Notice how we use the index to assign a different distance to each alert */}
+                <p className="alerts-area">
+                  {alert.area || 'Area not listed'} • <strong>{mockDistances[index % mockDistances.length]} away</strong>
+                </p>
               </div>
               <span className="alerts-severity">{alert.severity || 'Unknown'}</span>
             </div>

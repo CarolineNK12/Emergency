@@ -409,12 +409,19 @@ body * {
   align-items: center;
 }
 
+.page-wrapper {
+  flex: 1; 
+  display: flex;
+  flex-direction: column;
+}
+
 .alerts-page {
   width: 100%;
   max-width: 640px;
   margin: 0 auto;
   padding: 24px 16px 96px;
   box-sizing: border-box;
+  padding-bottom: 100px
 }
 
 .alerts-header {
@@ -446,6 +453,7 @@ body * {
   display: flex;
   flex-direction: column;
   gap: 12px;
+    flex-grow: 1; /* Tells the list to expand and consume all empty space, pushing the nav down */
 }
 
 .alerts-card {
