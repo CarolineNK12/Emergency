@@ -198,7 +198,7 @@
   font-weight: bolder;
   cursor: pointer;
 
-  animation: pulse-shadow 1.5s infinite ease-in-out;
+  animation: pulse-shadow 1s infinite;
 }
 
 .sosbutton:hover {
@@ -210,10 +210,10 @@
   0% {
     box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
   }
-  70% {
+  60% {
     box-shadow: 0 0 0 32px rgba(255, 0, 0, 0.484);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+    box-shadow: 0 0 0 64px rgba(255, 0, 0, 0);
   }
 }
