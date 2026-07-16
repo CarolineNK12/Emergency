@@ -1,15 +1,16 @@
-import { StrictMode, useEffect, useMemo, useState } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import Home from './home.jsx'
-import GuidePage from './guide.jsx'
-import Footer, { footerItems } from './assets/footer.jsx'
-import Maps from './Maps.jsx'
+import { StrictMode, useEffect, useMemo, useState } from "react";
+import { createRoot } from "react-dom/client";
+import "./index.css";
+import Home from "./home.jsx";
+import GuidePage from "./guide.jsx";
+import Footer, { footerItems } from "./assets/footer.jsx";
+import Maps from "./Maps.jsx";
+import ProfilPage from "./Profil.jsx";
 
 function getCurrentRoute() {
-  const path = window.location.pathname
-  const knownRoutes = footerItems.map((item) => item.href)
-  return knownRoutes.includes(path) ? path : '/'
+  const path = window.location.pathname;
+  const knownRoutes = footerItems.map((item) => item.href);
+  return knownRoutes.includes(path) ? path : "/";
 }
 
 function PageShell({ title, description }) {
@@ -22,37 +23,42 @@ function PageShell({ title, description }) {
         </div>
       </section>
     </main>
-  )
+  );
 }
 
 function Router() {
-  const [route, setRoute] = useState(getCurrentRoute)
+  const [route, setRoute] = useState(getCurrentRoute);
 
   useEffect(() => {
-    const onPopstate = () => setRoute(getCurrentRoute())
-    window.addEventListener('popstate', onPopstate)
-    return () => window.removeEventListener('popstate', onPopstate)
-  }, [])
+    const onPopstate = () => setRoute(getCurrentRoute());
+    window.addEventListener("popstate", onPopstate);
+    return () => window.removeEventListener("popstate", onPopstate);
+  }, []);
 
   const handleNavigate = (path) => {
-    window.history.pushState({}, '', path)
-    setRoute(path)
-  }
+    window.history.pushState({}, "", path);
+    setRoute(path);
+  };
 
   const page = useMemo(() => {
     switch (route) {
-      case '/alerts':
-        return <PageShell title="Alerts" description="View emergency alerts and notifications." />
-      case '/map':
-        return <Maps />
-      case '/guide':
-        return <GuidePage onNavigate={handleNavigate} />
-      case '/profile':
-        return <PageShell title="Profile" description="Manage your contact details and emergency preferences." />
+      case "/alerts":
+        return (
+          <PageShell
+            title="Alerts"
+            description="View emergency alerts and notifications."
+          />
+        );
+      case "/map":
+        return <Maps />;
+      case "/guide":
+        return <GuidePage onNavigate={handleNavigate} />;
+      case "/profile":
+        return <ProfilPage />;
       default:
-        return <Home />
+        return <Home />;
     }
-  }, [route])
+  }, [route]);
 
   return (
     <>
@@ -60,11 +66,11 @@ function Router() {
       {/* 3. Pass handleNavigate directly into the Footer element */}
       <Footer onNavigate={handleNavigate} />
     </>
-  )
+  );
 }
 
-createRoot(document.getElementById('root')).render(
+createRoot(document.getElementById("root")).render(
   <StrictMode>
     <Router />
   </StrictMode>,
-)
+);
