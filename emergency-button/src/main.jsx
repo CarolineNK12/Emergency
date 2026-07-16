@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import Home from './home.jsx'
 import Footer, { footerItems } from './assets/footer.jsx'
+import Maps from './Maps.jsx'
 
 function getCurrentRoute() {
   const path = window.location.pathname
@@ -37,7 +38,7 @@ function Router() {
       case '/alerts':
         return <PageShell title="Alerts" description="View emergency alerts and notifications." />
       case '/map':
-        return <PageShell title="Map" description="Find your nearest safety routes and locations." />
+        return <Maps />
       case '/guide':
         return <PageShell title="Guide" description="Access step-by-step emergency procedures." />
       case '/profile':

@@ -1,207 +1,85 @@
 import React from 'react';
-import { View, Text, Image, TextInput, ScrollView, StyleSheet } from 'react-native';
 
 const locationData = [
   {
     id: 1,
     name: 'Hospital',
-    icon: require('./assets/hospital-icon.png'), 
+    // Using simple inline base64 or emoji placeholders since icons vary by system
+    icon: '🏥', 
     hours: 'Open 24 hours',
     distance: '0.5 km',
   },
   {
     id: 2,
     name: 'Police Station',
-    icon: require('./assets/police-icon.png'), 
+    icon: '👮', 
     hours: 'Open 24 hours',
     distance: '0.8 km',
   },
   {
     id: 3,
     name: 'Fire Station',
-    icon: require('./assets/fire-station-icon.png'), 
+    icon: '🚒', 
     hours: 'Open 24 hours',
     distance: '1.5 km',
   },
 ];
 
-const Maps = () => {
+export default function Maps() {
   return (
-    <View style={styles.container}>
-      {/* Title */}
-      <View style={styles.titleContainer}>
-        <Text style={styles.titleText}>Maps</Text>
-      </View>
+    <div className="maps-screen">
+      {/* Red Header Bar Header Accent matching your image styling */}
+      <div className="maps-top-accent">
+        <h1 className="maps-main-title">Maps</h1>
+      </div>
 
-      {/* Map Image and Location Callout */}
-      <View style={styles.mapContainer}>
-        <Image
-          source={require('./assets/map-screenshot.png')} 
-          style={styles.mapImage}
-          resizeMode="cover"
-        />
-        <View style={styles.callout}>
-          <Text style={styles.calloutText}>Gambir, DKI Jakarta</Text>
-        </View>
-      </View>
+      <div className="maps-body-content">
+        {/* Map Box Section */}
+        <div className="maps-graphic-wrapper">
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Indonesia_large_topographic_map.jpg/800px-Indonesia_large_topographic_map.jpg" 
+            alt="Map screenshot"
+            className="maps-display-img"
+          />
+          {/* Popover Tooltip Badge overlay */}
+          <div className="maps-callout-badge">
+            <span className="maps-red-pin">📍</span>
+            <span className="maps-callout-text">Gambir, DKI Jakarta</span>
+          </div>
+        </div>
 
-      {/* Search Bar */}
-      <View style={styles.searchBarContainer}>
-        <TextInput
-          style={styles.searchBarInput}
-          placeholder="Search location"
-          placeholderTextColor="#666"
-        />
-        {/*  Add a search icon here */}
-      </View>
+        {/* Input Search Block */}
+        <div className="maps-search-box">
+          <input
+            type="text"
+            placeholder="Search location"
+            className="maps-search-input"
+          />
+          <div className="maps-search-icon-under">🔍</div>
+        </div>
 
-      {/* Location List */}
-      <ScrollView style={styles.listContainer}>
-        {locationData.map((location) => (
-          <View key={location.id} style={styles.listItem}>
-            <View style={styles.listItemImageContainer}>
-                <Image source={location.icon} style={styles.listItemIcon} />
-            </View>
-            <View style={styles.listItemDetails}>
-              <Text style={styles.listItemName}>{location.name}</Text>
-              <Text style={styles.listItemHours}>{location.hours}</Text>
-              <Text style={styles.listItemLink}>Details</Text>
-            </View>
-            <View style={styles.listItemDistanceContainer}>
-                {/* Add a pin icon here if you like */}
-                <Text style={styles.listItemDistance}>{location.distance}</Text>
-            </View>
-          </View>
-        ))}
-      </ScrollView>
-    </View>
+        {/* Dynamic Cards Grid Iteration */}
+        <div className="maps-scroll-feed">
+          {locationData.map((location) => (
+            <div key={location.id} className="maps-list-item-card">
+              <div className="maps-item-icon-frame">
+                <span style={{ fontSize: '32px' }}>{location.icon}</span>
+              </div>
+              
+              <div className="maps-item-details-stack">
+                <h3 className="maps-item-title">{location.name}</h3>
+                <p className="maps-item-hours-text">{location.hours}</p>
+                <a href="#details" className="maps-item-details-link">Details</a>
+              </div>
+
+              <div className="maps-item-distance-tag">
+                <span style={{ marginRight: '2px' }}>📍</span>
+                {location.distance}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
-};
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    width: '100%',
-  },
-  titleContainer: {
-    paddingTop: 50,
-    paddingBottom: 20,
-    borderBottomWidth: 3,
-    borderBottomColor: '#a12b2b',
-    width: '100%',
-    alignItems: 'center',
-  },
-  titleText: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#a12b2b',
-    textDecorationLine: 'underline',
-  },
-  mapContainer: {
-    marginVertical: 20,
-    alignItems: 'center',
-    position: 'relative',
-    width: '90%',
-    aspectRatio: 2, 
-  },
-  mapImage: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#000',
-  },
-  callout: {
-    position: 'absolute',
-    top: '30%', 
-    left: '40%', 
-    backgroundColor: '#fff',
-    paddingVertical: 5,
-    paddingHorizontal: 15,
-    borderRadius: 15,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 3,
-  },
-  calloutText: {
-    fontSize: 14,
-    color: '#333',
-  },
-  searchBarContainer: {
-    width: '80%',
-    marginBottom: 20,
-  },
-  searchBarInput: {
-    height: 40,
-    borderColor: '#000',
-    borderWidth: 1,
-    borderRadius: 20,
-    paddingHorizontal: 20,
-    fontSize: 14,
-  },
-  listContainer: {
-    width: '90%',
-    marginBottom: 100, 
-  },
-  listItem: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
-    padding: 15,
-    marginBottom: 15,
-    borderRadius: 15,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    alignItems: 'center',
-  },
-  listItemImageContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 15,
-  },
-  listItemIcon: {
-    width: 40,
-    height: 40,
-  },
-  listItemDetails: {
-    flex: 1,
-  },
-  listItemName: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 2,
-  },
-  listItemHours: {
-    fontSize: 14,
-    color: '#a12b2b',
-    marginBottom: 5,
-  },
-  listItemLink: {
-    fontSize: 14,
-    color: '#333',
-    textDecorationLine: 'underline',
-  },
-  listItemDistanceContainer: {
-    alignItems: 'flex-end',
-    justifyContent: 'flex-start',
-    position: 'absolute',
-    top: 15,
-    right: 15,
-  },
-  listItemDistance: {
-    fontSize: 14,
-    color: '#a12b2b',
-  },
-});
-
-export default Maps;
+}
