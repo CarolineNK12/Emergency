@@ -1,3 +1,12 @@
+body {
+    background-color: white;
+    color: black;
+}
+
+body * {
+    color: black;
+}
+
 .counter {
   font-size: 16px;
   padding: 5px 10px;
@@ -206,14 +215,14 @@
   box-shadow: 0px 16px 0px rgb(171, 0, 0);
 }
 
-@keyframes pulse-shadow{
+@keyframes pulse-shadow {
   0% {
-    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.45);
   }
-  60% {
-    box-shadow: 0 0 0 32px rgba(255, 0, 0, 0.484);
+  70% {
+    box-shadow: 0 0 0 24px rgba(255, 0, 0, 0);
   }
   100% {
-    box-shadow: 0 0 0 64px rgba(255, 0, 0, 0);
+    box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
   }
 }
