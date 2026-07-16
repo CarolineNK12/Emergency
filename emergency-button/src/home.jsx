@@ -5,7 +5,7 @@ import heroImg from './assets/hero.png'
 import './App.css'
 import Footer from './assets/footer.jsx'
 
-function App() {
+function Home() {
   const [count, setCount] = useState(0)
 
   return (
@@ -17,6 +17,7 @@ function App() {
             someone put the carousel here!!!!!!!!!!!
           </p>
         </div>
+        <section id="spacer"></section>
         <div>
           <a href="tel:+62112" className="sosbutton">
             CALL
@@ -25,9 +26,8 @@ function App() {
       </section>
       <div className="ticks"></div>
       <section id="spacer"></section>
-      <Footer />
     </>
   )
 }
 
-export default App
+export default Home

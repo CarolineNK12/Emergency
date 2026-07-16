@@ -1,6 +1,6 @@
 import './footer.css'
 
-const footerItems = [
+export const footerItems = [
   {
     label: 'Home',
     href: '/',
