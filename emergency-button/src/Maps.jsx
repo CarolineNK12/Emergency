@@ -1,10 +1,10 @@
 import React from 'react';
-import { Map } from "@/components/ui/map"; // Imported mapcn interactive Map engine
 
 const locationData = [
   {
     id: 1,
     name: 'Hospital',
+    // Using simple inline base64 or emoji placeholders since icons vary by system
     icon: '🏥', 
     hours: 'Open 24 hours',
     distance: '0.5 km',
@@ -34,13 +34,14 @@ export default function Maps() {
       </div>
 
       <div className="maps-body-content">
-        {/* Interactive Map Wrapper Box Container */}
+        {/* Map Box Section */}
         <div className="maps-graphic-wrapper">
-          
-          {/* Dynamic Interactive map engine replacing the broken image snapshot */}
-          <Map center={[106.8307, -6.1768]} zoom={14} />
-
-          {/* Floating Location Badge Popover Tooltip */}
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Indonesia_large_topographic_map.jpg/800px-Indonesia_large_topographic_map.jpg" 
+            alt="Map screenshot"
+            className="maps-display-img"
+          />
+          {/* Popover Tooltip Badge overlay */}
           <div className="maps-callout-badge">
             <span className="maps-red-pin">📍</span>
             <span className="maps-callout-text">Gambir, DKI Jakarta</span>
