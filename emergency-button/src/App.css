@@ -269,12 +269,13 @@ body * {
 .maps-graphic-wrapper {
   position: relative;
   width: 100%;
-  height: 190px;
+  height: 240px; 
   border: 1px solid #000000;
   border-radius: 20px;
   overflow: hidden;
   margin-bottom: 20px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  z-index: 1; 
 }
 
 .maps-display-img {
