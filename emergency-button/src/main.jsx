@@ -2,6 +2,7 @@ import { StrictMode, useEffect, useMemo, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import Home from './home.jsx'
+import GuidePage from './guide.jsx'
 import Footer, { footerItems } from './assets/footer.jsx'
 import Maps from './Maps.jsx'
 
@@ -33,6 +34,11 @@ function Router() {
     return () => window.removeEventListener('popstate', onPopstate)
   }, [])
 
+  const handleNavigate = (path) => {
+    window.history.pushState({}, '', path)
+    setRoute(path)
+  }
+
   const page = useMemo(() => {
     switch (route) {
       case '/alerts':
@@ -40,7 +46,7 @@ function Router() {
       case '/map':
         return <Maps />
       case '/guide':
-        return <PageShell title="Guide" description="Access step-by-step emergency procedures." />
+        return <GuidePage onNavigate={handleNavigate} />
       case '/profile':
         return <PageShell title="Profile" description="Manage your contact details and emergency preferences." />
       default:
@@ -51,7 +57,8 @@ function Router() {
   return (
     <>
       {page}
-      <Footer />
+      {/* 3. Pass handleNavigate directly into the Footer element */}
+      <Footer onNavigate={handleNavigate} />
     </>
   )
 }
