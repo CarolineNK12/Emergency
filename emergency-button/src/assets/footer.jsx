@@ -49,7 +49,8 @@ export const footerItems = [
   },
 ]
 
-function Footer() {
+// 1. Pass down the navigation handler function
+function Footer({ onNavigate }) {
   return (
     <footer className="footer-bar" role="contentinfo">
       <div className="footer-bar__inner">
@@ -59,6 +60,11 @@ function Footer() {
             href={item.href}
             className={`footer-bar__item ${item.primary ? 'footer-bar__item--primary' : ''}`}
             aria-label={item.label}
+            // 2. Intercept click events to prevent full page reloads
+            onClick={(e) => {
+              e.preventDefault()
+              if (onNavigate) onNavigate(item.href)
+            }}
           >
             <span className="footer-bar__icon">{item.icon}</span>
             <span className="footer-bar__label">{item.label}</span>
