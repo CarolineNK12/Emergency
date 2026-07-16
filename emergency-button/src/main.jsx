@@ -6,6 +6,7 @@ import GuidePage from "./guide.jsx";
 import Footer, { footerItems } from "./assets/footer.jsx";
 import Maps from "./Maps.jsx";
 import ProfilPage from "./Profil.jsx";
+import Alerts from "./alerts.jsx";
 
 function getCurrentRoute() {
   const path = window.location.pathname;
@@ -43,12 +44,7 @@ function Router() {
   const page = useMemo(() => {
     switch (route) {
       case "/alerts":
-        return (
-          <PageShell
-            title="Alerts"
-            description="View emergency alerts and notifications."
-          />
-        );
+        return <Alerts />;
       case "/map":
         return <Maps />;
       case "/guide":
@@ -69,8 +65,27 @@ function Router() {
   );
 }
 
-createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <Router />
-  </StrictMode>,
-);
+let root = null;
+
+function renderApp() {
+  const container = document.getElementById("root");
+  if (!container) {
+    return;
+  }
+
+  if (!root) {
+    root = createRoot(container);
+  }
+
+  root.render(
+    <StrictMode>
+      <Router />
+    </StrictMode>,
+  );
+}
+
+renderApp();
+
+if (import.meta.hot) {
+  import.meta.hot.accept();
+}
