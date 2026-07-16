@@ -1,41 +1,55 @@
 import { useState } from "react";
 import "./App.css";
 
-// Indonesian emergency service numbers
 const SERVICES = [
   {
     key: "police",
     name: "Police",
-    desc: "Polisi",
-    icon: "🚔",
+    desc: "Police Department",
+    icon: "👮",
     number: "110",
-    color: "#1f4e91",
   },
   {
     key: "ambulance",
     name: "Ambulance",
-    desc: "Ambulans",
-    icon: "🚑",
+    desc: "Medical Services",
+    icon: "🏥",
     number: "118",
-    color: "#c62828",
   },
   {
     key: "fire",
     name: "Fire Fighter",
-    desc: "Pemadam Kebakaran",
+    desc: "Fire Department",
     icon: "🚒",
     number: "113",
-    color: "#d84315",
   },
 ];
 
 function Home() {
   const [open, setOpen] = useState(false);
   const [idx, setIdx] = useState(0);
+  const [isFlickering, setIsFlickering] = useState(false);
 
   const service = SERVICES[idx];
-  const prev = () => setIdx((i) => (i - 1 + SERVICES.length) % SERVICES.length);
-  const next = () => setIdx((i) => (i + 1) % SERVICES.length);
+  const prev = () => handleIndexChange((idx - 1 + SERVICES.length) % SERVICES.length);
+  const next = () => handleIndexChange((idx + 1) % SERVICES.length);
+
+  // Triggers the flicker transition state when changing selections
+  const handleIndexChange = (newIdx) => {
+    setIsFlickering(true);
+    setIdx(newIdx);
+    setTimeout(() => {
+      setIsFlickering(false);
+    }, 250); // Matches the short keyframe animation timing
+  };
+
+  const leftIdx = (idx - 1 + SERVICES.length) % SERVICES.length;
+  const rightIdx = (idx + 1) % SERVICES.length;
+  const orderedServices = [
+    { ...SERVICES[leftIdx], originalIndex: leftIdx, position: "left" },
+    { ...SERVICES[idx], originalIndex: idx, position: "center" },
+    { ...SERVICES[rightIdx], originalIndex: rightIdx, position: "right" }
+  ];
 
   return (
     <div style={styles.screen}>
@@ -57,17 +71,66 @@ function Home() {
         <button
           className="sosbutton"
           onClick={() => {
-            setIdx(0);
             setOpen(true);
           }}
         >
           CALL
         </button>
 
-        <p style={styles.hint}>Tap CALL to choose a service</p>
+        <p style={styles.hint}>Tap CALL to open choose service overlay</p>
       </div>
 
-      {/* --- Modal / Carousel popup --- */}
+      {/* --- HIGHLY FOCUSED SLIDER SECTION WITH SELECTION FLICKER --- */}
+      <div style={styles.inlineBoxesContainer}>
+        <h3 style={styles.carouselTitle}>Instant Options</h3>
+        <p style={styles.carouselSub}>
+          Tap the left or right cards to switch focus, or tap the prominent center card to call
+        </p>
+
+        <div style={styles.sliderFlexWrapper}>
+          {orderedServices.map((item) => {
+            const isCenter = item.position === "center";
+            return (
+              <a
+                key={item.key}
+                href={isCenter ? `tel:${item.number}` : undefined}
+                onClick={(e) => {
+                  if (!isCenter) {
+                    e.preventDefault();
+                    handleIndexChange(item.originalIndex);
+                  }
+                }}
+                className={isFlickering ? "flicker-anim" : ""}
+                style={{
+                  ...styles.panicBoxCard,
+                  borderColor: isCenter ? "#a12b2b" : "#e5e4e7",
+                  background: isCenter ? "#fff5f5" : "#ffffff",
+                  // Enhanced scale ratio: side cards are kept significantly more compact
+                  width: isCenter ? "38%" : "25%", 
+                  height: isCenter ? "150px" : "95px", 
+                  opacity: isCenter ? 1 : 0.35,
+                  zIndex: isCenter ? 2 : 1,
+                  padding: isCenter ? "16px 8px" : "8px 4px",
+                  boxShadow: isCenter ? "0 6px 14px rgba(161,43,43,0.12)" : "none"
+                }}
+              >
+                <div style={{ ...styles.boxIcon, fontSize: isCenter ? "34px" : "22px" }}>{item.icon}</div>
+                <div style={{ ...styles.boxName, fontSize: isCenter ? "14px" : "11px", fontWeight: isCenter ? "700" : "500" }}>{item.name}</div>
+                <div style={{ 
+                  ...styles.boxNumberText, 
+                  fontSize: isCenter ? "16px" : "13px", 
+                  color: isCenter ? "#a12b2b" : "#999" 
+                }}>
+                  {item.number}
+                </div>
+                {isCenter && <div style={styles.tapToCallTag}>TAP TO DIAL</div>}
+              </a>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* --- Original Modal Popup Overlay (Updated for crisp bold white readability) --- */}
       {open && (
         <div style={styles.overlay} onClick={() => setOpen(false)}>
           <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -89,24 +152,24 @@ function Home() {
                 ‹
               </button>
 
-              {/* The card is an <a href="tel:..."> so tapping it calls */}
               <a
                 href={`tel:${service.number}`}
                 style={{
                   ...styles.serviceCard,
-                  background: `linear-gradient(160deg, ${service.color}, #000)`,
+                  background: `linear-gradient(160deg, #1f4e91, #080d1a)`,
                 }}
               >
                 <div style={styles.serviceIcon}>{service.icon}</div>
-                <div style={styles.serviceName}>{service.name}</div>
-                <div style={styles.serviceDesc}>{service.desc}</div>
+                {/* Text attributes forced to bold white for clear layout legibility */}
+                <div style={{ ...styles.serviceName, color: "#ffffff", fontWeight: "bold" }}>{service.name}</div>
+                <div style={{ ...styles.serviceDesc, color: "#ffffff", fontWeight: "bold" }}>{service.desc}</div>
 
                 <div style={styles.numberPill}>
-                  <span style={{ fontSize: 14, opacity: 0.85 }}>📞</span>
-                  <span style={styles.numberText}>{service.number}</span>
+                  <span style={{ fontSize: 14, color: "#fff", fontWeight: "bold" }}>📞</span>
+                  <span style={{ ...styles.numberText, color: "#ffffff", fontWeight: "bold" }}>{service.number}</span>
                 </div>
 
-                <div style={styles.tapHint}>TAP TO CALL</div>
+                <div style={{ ...styles.tapHint, color: "#ffffff", fontWeight: "bold" }}>TAP TO CALL</div>
               </a>
 
               <button style={styles.arrow} onClick={next} aria-label="Next">
@@ -114,12 +177,11 @@ function Home() {
               </button>
             </div>
 
-            {/* Dots indicator */}
             <div style={styles.dots}>
               {SERVICES.map((s, i) => (
                 <button
                   key={s.key}
-                  onClick={() => setIdx(i)}
+                  onClick={() => handleIndexChange(i)}
                   aria-label={s.name}
                   style={{
                     ...styles.dot,
@@ -130,12 +192,11 @@ function Home() {
               ))}
             </div>
 
-            {/* Quick-select mini row */}
             <div style={styles.miniRow}>
               {SERVICES.map((s, i) => (
                 <button
                   key={s.key}
-                  onClick={() => setIdx(i)}
+                  onClick={() => handleIndexChange(i)}
                   style={{
                     ...styles.miniBtn,
                     borderColor: i === idx ? "#a12b2b" : "#ddd",
@@ -152,38 +213,38 @@ function Home() {
         </div>
       )}
 
-      {/* Small keyframes needed for the modal + card float */}
+      {/* CSS Styles injection for selection flicker logic */}
       <style>{`
         @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
         @keyframes popIn {
           0% { opacity: 0; transform: translateY(20px) scale(0.95); }
           100% { opacity: 1; transform: translateY(0) scale(1); }
         }
-        @keyframes floatCard {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-4px); }
+        @keyframes cardFlicker {
+          0% { opacity: 0.3; transform: scale(0.92); filter: brightness(1.2); }
+          50% { opacity: 0.8; filter: brightness(0.9); }
+          100% { opacity: 1; }
         }
-        .service-card-anim { animation: floatCard 3s ease-in-out infinite; }
+        .flicker-anim {
+          animation: cardFlicker 0.22s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
       `}</style>
     </div>
   );
 }
 
-// ---------- inline styles (kept in one place for readability) ----------
 const styles = {
   screen: {
     width: "100%",
     maxWidth: 480,
     margin: "0 auto",
-    padding: "16px 20px 24px",
+    padding: "16px 20px 100px",
     boxSizing: "border-box",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     gap: 20,
   },
-
-  // Top red card
   alertCard: {
     width: "100%",
     background: "linear-gradient(135deg, #a12b2b 0%, #700909 100%)",
@@ -192,6 +253,7 @@ const styles = {
     color: "#fff",
     position: "relative",
     boxShadow: "0 8px 20px rgba(112,9,9,.25)",
+    boxSizing: "border-box"
   },
   alertBadge: {
     display: "inline-block",
@@ -222,7 +284,6 @@ const styles = {
     fontWeight: 700,
     boxShadow: "0 2px 5px rgba(0,0,0,.1)",
   },
-
   callSection: {
     display: "flex",
     flexDirection: "column",
@@ -241,8 +302,179 @@ const styles = {
     fontSize: 12,
     color: "#666",
   },
-
-  // Modal
+  inlineBoxesContainer: {
+    width: "100%",
+    border: "1px solid #e5e4e7",
+    borderRadius: 22,
+    padding: "20px 14px 24px 14px",
+    backgroundColor: "#fff",
+    boxShadow: "rgba(0, 0, 0, 0.05) 0px 4px 6px -2px",
+    boxSizing: "border-box"
+  },
+  carouselTitle: {
+    margin: "0 0 4px 0",
+    fontSize: 18,
+    fontWeight: 800,
+    color: "#700909",
+    textAlign: "center",
+  },
+  carouselSub: {
+    margin: "0 0 20px 0",
+    fontSize: 12,
+    color: "#666",
+    textAlign: "center",
+    lineHeight: "140%"
+  },
+  sliderFlexWrapper: {
+    display: "flex",
+    width: "100%",
+    gap: 8,
+    alignItems: "center",
+    justifyContent: "space-between",
+    height: "160px",
+  },
+  panicBoxCard: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: "15px",
+    border: "1px solid #ddd",
+    textDecoration: "none",
+    color: "#333333",
+    cursor: "pointer",
+    boxSizing: "border-box",
+    transition: "all 0.28s cubic-bezier(0.4, 0, 0.2, 1)"
+  },
+  boxIcon: {
+    lineHeight: 1,
+    marginBottom: 4,
+    transition: "font-size 0.28s ease"
+  },
+  boxName: {
+    textAlign: "center",
+    color: "#333333",
+    marginBottom: 2,
+    whiteSpace: "nowrap",
+    transition: "font-size 0.28s ease"
+  },
+  boxNumberText: {
+    fontWeight: "800",
+    transition: "all 0.28s ease"
+  },
+  tapToCallTag: {
+    fontSize: "8px",
+    fontWeight: "bold",
+    color: "#a12b2b",
+    marginTop: "6px",
+    letterSpacing: "0.5px",
+  },
+  carousel: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 12,
+  },
+  arrow: {
+    width: 34,
+    height: 34,
+    borderRadius: "50%",
+    border: "1px solid #ddd",
+    background: "#fff",
+    fontSize: 24,
+    lineHeight: 1,
+    cursor: "pointer",
+    color: "#a12b2b",
+    fontWeight: 700,
+    boxShadow: "0 2px 5px rgba(0,0,0,.08)",
+  },
+  serviceCard: {
+    flex: 1,
+    minHeight: 220,
+    borderRadius: 20,
+    textDecoration: "none",
+    padding: "18px 14px",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    boxShadow: "0 10px 20px rgba(0,0,0,.15)",
+    cursor: "pointer",
+    userSelect: "none",
+  },
+  serviceIcon: {
+    fontSize: 68,
+    lineHeight: 1,
+  },
+  serviceName: {
+    fontSize: 20,
+    marginTop: 4,
+  },
+  serviceDesc: {
+    fontSize: 12,
+    opacity: 0.85,
+  },
+  numberPill: {
+    marginTop: 8,
+    background: "rgba(255,255,255,.18)",
+    borderRadius: 999,
+    padding: "6px 14px",
+    display: "flex",
+    alignItems: "center",
+    gap: 6,
+  },
+  numberText: {
+    fontSize: 22,
+    letterSpacing: 1,
+  },
+  tapHint: {
+    marginTop: 6,
+    fontSize: 11,
+    letterSpacing: 1.5,
+    opacity: 0.9,
+  },
+  dots: {
+    display: "flex",
+    justifyContent: "center",
+    gap: 8,
+    marginBottom: 14,
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: "50%",
+    border: "none",
+    padding: 0,
+    cursor: "pointer",
+    transition: "transform .15s ease",
+  },
+  miniRow: {
+    display: "grid",
+    gridTemplateColumns: "repeat(3, 1fr)",
+    gap: 8,
+  },
+  miniBtn: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 2,
+    padding: "8px 4px",
+    borderRadius: 12,
+    border: "1px solid #ddd",
+    cursor: "pointer",
+    background: "#fff",
+  },
+  miniLabel: {
+    fontSize: 11,
+    fontWeight: 700,
+    color: "#333",
+  },
+  miniNum: {
+    fontSize: 12,
+    fontWeight: 800,
+    color: "#a12b2b",
+  },
   overlay: {
     position: "fixed",
     inset: 0,
@@ -291,120 +523,6 @@ const styles = {
     fontSize: 12,
     color: "#666",
     textAlign: "center",
-  },
-
-  carousel: {
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 12,
-  },
-  arrow: {
-    width: 34,
-    height: 34,
-    borderRadius: "50%",
-    border: "1px solid #ddd",
-    background: "#fff",
-    fontSize: 24,
-    lineHeight: 1,
-    cursor: "pointer",
-    color: "#a12b2b",
-    fontWeight: 700,
-    boxShadow: "0 2px 5px rgba(0,0,0,.08)",
-  },
-  serviceCard: {
-    flex: 1,
-    minHeight: 220,
-    borderRadius: 20,
-    color: "#fff",
-    textDecoration: "none",
-    padding: "18px 14px",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    boxShadow: "0 10px 20px rgba(0,0,0,.15)",
-    cursor: "pointer",
-    userSelect: "none",
-  },
-  serviceIcon: {
-    fontSize: 68,
-    lineHeight: 1,
-    filter: "drop-shadow(0 4px 6px rgba(0,0,0,.35))",
-  },
-  serviceName: {
-    fontSize: 20,
-    fontWeight: 800,
-    marginTop: 4,
-  },
-  serviceDesc: {
-    fontSize: 12,
-    opacity: 0.85,
-  },
-  numberPill: {
-    marginTop: 8,
-    background: "rgba(255,255,255,.18)",
-    borderRadius: 999,
-    padding: "6px 14px",
-    display: "flex",
-    alignItems: "center",
-    gap: 6,
-  },
-  numberText: {
-    fontSize: 22,
-    fontWeight: 900,
-    letterSpacing: 1,
-  },
-  tapHint: {
-    marginTop: 6,
-    fontSize: 11,
-    letterSpacing: 1.5,
-    opacity: 0.9,
-    fontWeight: 700,
-  },
-
-  dots: {
-    display: "flex",
-    justifyContent: "center",
-    gap: 8,
-    marginBottom: 14,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: "50%",
-    border: "none",
-    padding: 0,
-    cursor: "pointer",
-    transition: "transform .15s ease",
-  },
-
-  miniRow: {
-    display: "grid",
-    gridTemplateColumns: "repeat(3, 1fr)",
-    gap: 8,
-  },
-  miniBtn: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: 2,
-    padding: "8px 4px",
-    borderRadius: 12,
-    border: "1px solid #ddd",
-    cursor: "pointer",
-    background: "#fff",
-  },
-  miniLabel: {
-    fontSize: 11,
-    fontWeight: 700,
-    color: "#333",
-  },
-  miniNum: {
-    fontSize: 12,
-    fontWeight: 800,
-    color: "#a12b2b",
   },
 };
 
