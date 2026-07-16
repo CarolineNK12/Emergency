@@ -37,16 +37,18 @@ deactivate () {
 deactivate nondestructive
 
 # on Windows, a path can contain colons and backslashes and has to be converted:
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VENV_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 case "$(uname)" in
     CYGWIN*|MSYS*|MINGW*)
         # transform D:\path\to\venv to /d/path/to/venv on MSYS and MINGW
         # and to /cygdrive/d/path/to/venv on Cygwin
-        VIRTUAL_ENV=$(cygpath 'C:\Users\Carol\Emergency\Emergency\emergency-button-backend\venv')
+        VIRTUAL_ENV=$(cygpath "$VENV_ROOT")
         export VIRTUAL_ENV
         ;;
     *)
         # use the path as-is
-        export VIRTUAL_ENV='C:\Users\Carol\Emergency\Emergency\emergency-button-backend\venv'
+        export VIRTUAL_ENV="$VENV_ROOT"
         ;;
 esac
 
