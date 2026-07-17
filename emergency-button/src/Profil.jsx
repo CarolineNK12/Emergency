@@ -1,8 +1,13 @@
 import React, { useState } from "react";
 
 const Profil = () => {
+  // Main view state: 'guest' | 'profile'
   const [currentView, setCurrentView] = useState("guest");
-  const [modalView, setModalView] = useState("none"); // "login", "signup", "details", "password"
+
+  // Pop-up modal state: 'none' | 'login' | 'signup'
+  const [modalView, setModalView] = useState("none");
+
+  // Interactive Dropdown state for Sign Up
   const [showFamilyDropdown, setShowFamilyDropdown] = useState(false);
 
   // Form States
@@ -12,143 +17,69 @@ const Profil = () => {
   const [familyType, setFamilyType] = useState("Mother");
   const [familyNumber, setFamilyNumber] = useState("");
 
-  // Change Password States
-  const [oldPassword, setOldPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-
+  // Demo Account & Logged-in User Data
   const [userData, setUserData] = useState({
     name: "Shandy Afrian Mashuri",
-    email: "shandy@gmail.com",
     emergencyContact: {
       relation: "Mom",
       number: "0812 3459 3987",
     },
   });
 
-  // 1. Connect Login to Backend API
-  const handleLogin = async () => {
-    try {
-      const response = await fetch("http://localhost:5000/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setUserData(data.user);
-        setCurrentView("profile");
-        setModalView("none");
-      } else {
-        alert(data.error || "Login failed. Please check your credentials.");
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      alert(
-        "Cannot connect to server. Ensure your Flask backend is running on port 5000.",
-      );
-    }
-  };
-
-  // 2. Connect Sign Up to Backend API
-  const handleSignUp = async () => {
-    if (!fullName || !email || !password || !familyNumber) {
-      alert("Please fill in all required fields!");
-      return;
-    }
-
-    try {
-      const response = await fetch("http://localhost:5000/api/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fullName,
-          email,
-          password,
-          familyType: familyType || "Family",
-          familyNumber,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setUserData(data.user);
-        setCurrentView("profile");
-        setModalView("none");
-        alert("Account created successfully!");
-      } else {
-        alert(data.error || "Sign up failed.");
-      }
-    } catch (error) {
-      console.error("Sign up error:", error);
-      alert(
-        "Cannot connect to server. Ensure your Flask backend is running on port 5000.",
-      );
-    }
-  };
-
-  // 3. Connect Change Password to Backend API
-  const handleChangePassword = async () => {
-    if (!oldPassword || !newPassword || !confirmPassword) {
-      alert("Please fill in all password fields!");
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      alert("New passwords do not match!");
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        "http://localhost:5000/api/change-password",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: userData.email,
-            oldPassword,
-            newPassword,
-          }),
+  // Handle Login
+  const handleLogin = () => {
+    if (email === "shandy@gmail.com" || email === "") {
+      setUserData({
+        name: "Shandy Afrian Mashuri",
+        emergencyContact: {
+          relation: "Mom",
+          number: "0812 3459 3987",
         },
-      );
-
-      const data = await response.json();
-
-      if (response.ok) {
-        alert("Password updated successfully!");
-        setModalView("none");
-        setOldPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
-      } else {
-        alert(data.error || "Failed to change password.");
-      }
-    } catch (error) {
-      console.error("Change password error:", error);
-      alert(
-        "Cannot connect to server. Ensure your Flask backend is running on port 5000.",
-      );
+      });
     }
+    setCurrentView("profile");
+    setModalView("none");
+  };
+
+  // Handle Sign Up
+  const handleSignUp = () => {
+    if (fullName && familyNumber) {
+      setUserData({
+        name: fullName,
+        emergencyContact: {
+          relation: familyType || "Family",
+          number: familyNumber,
+        },
+      });
+    }
+    setCurrentView("profile");
+    setModalView("none");
   };
 
   return (
     <div style={styles.container}>
-      {/* Title Header */}
+      {/* Title Header matching the top layout format of the other screens */}
       <div style={styles.titleContainer}>
         <h1 style={styles.titleText}>Profile</h1>
       </div>
 
       <div style={styles.scrollContainer}>
-        {/* ================= GUEST VIEW ================= */}
+        {/* ================= GUEST VIEW (Restructured to match Figma Design) ================= */}
         {currentView === "guest" && (
           <div style={styles.card}>
-            <div style={styles.avatarContainer}>
-              <div style={styles.avatar} />
-              <span style={styles.greetingText}>Hello Guest</span>
+            {/* Vertically stacked header items per Figma mockup specs */}
+            <div style={styles.figmaHeaderContainer}>
+              <span style={styles.greetingText}>Hello, Guest!</span>
+              
+              {/* Profile Avatar Icon with inner vector symbol design */}
+              <div style={styles.avatar}>
+                <svg 
+                  viewBox="0 0 24 24" 
+                  style={{ width: "38px", height: "38px", fill: "#ffffff" }}
+                >
+                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
+              </div>
             </div>
 
             <button
@@ -179,23 +110,12 @@ const Profil = () => {
         {currentView === "profile" && (
           <div style={styles.card}>
             <div style={styles.avatarContainer}>
-              <div style={styles.avatar} />
+              <div style={styles.avatarLoggedIn} />
               <span style={styles.profileName}>{userData.name}</span>
             </div>
 
-            <button
-              style={styles.menuButton}
-              onClick={() => setModalView("details")}
-            >
-              👤 Account Details &gt;
-            </button>
-
-            <button
-              style={styles.menuButton}
-              onClick={() => setModalView("password")}
-            >
-              🔒 Change Password &gt;
-            </button>
+            <button style={styles.menuButton}>👤 Account Details &gt;</button>
+            <button style={styles.menuButton}>🔒 Change Password &gt;</button>
 
             {/* Emergency Call Box */}
             <div style={styles.emergencyBox}>
@@ -236,12 +156,7 @@ const Profil = () => {
           <div style={styles.modalContent}>
             <button
               style={styles.closeButton}
-              onClick={() => {
-                setModalView("none");
-                setOldPassword("");
-                setNewPassword("");
-                setConfirmPassword("");
-              }}
+              onClick={() => setModalView("none")}
             >
               ✕
             </button>
@@ -307,8 +222,6 @@ const Profil = () => {
                   style={styles.input}
                   type="email"
                   placeholder="Your Gmail"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
                 />
 
                 <label style={styles.label}>Family and Siblings</label>
@@ -368,8 +281,6 @@ const Profil = () => {
                   style={styles.input}
                   type="password"
                   placeholder="Enter Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
                 />
 
                 <button style={styles.redButton} onClick={handleSignUp}>
@@ -385,82 +296,6 @@ const Profil = () => {
                 </button>
               </div>
             )}
-
-            {/* ACCOUNT DETAILS POPUP */}
-            {modalView === "details" && (
-              <div style={styles.modalForm}>
-                <h2 style={styles.formTitle}>Account Details</h2>
-                <p style={styles.formSubtitle}>Your registered information</p>
-
-                <div style={styles.detailBox}>
-                  <label style={styles.detailLabel}>Full Name</label>
-                  <p style={styles.detailValue}>{userData.name}</p>
-
-                  <label style={styles.detailLabel}>Email (Gmail)</label>
-                  <p style={styles.detailValue}>{userData.email}</p>
-
-                  <label style={styles.detailLabel}>
-                    Emergency Contact Relation
-                  </label>
-                  <p style={styles.detailValue}>
-                    {userData.emergencyContact.relation}
-                  </p>
-
-                  <label style={styles.detailLabel}>
-                    Emergency Phone Number
-                  </label>
-                  <p style={styles.detailValue}>
-                    {userData.emergencyContact.number}
-                  </p>
-                </div>
-
-                <button
-                  style={styles.redButton}
-                  onClick={() => setModalView("none")}
-                >
-                  Close
-                </button>
-              </div>
-            )}
-
-            {/* CHANGE PASSWORD POPUP */}
-            {modalView === "password" && (
-              <div style={styles.modalForm}>
-                <h2 style={styles.formTitle}>Change Password</h2>
-                <p style={styles.formSubtitle}>Create a new secure password</p>
-
-                <label style={styles.label}>Current Password</label>
-                <input
-                  style={styles.input}
-                  type="password"
-                  placeholder="Enter old password"
-                  value={oldPassword}
-                  onChange={(e) => setOldPassword(e.target.value)}
-                />
-
-                <label style={styles.label}>New Password</label>
-                <input
-                  style={styles.input}
-                  type="password"
-                  placeholder="Enter new password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                />
-
-                <label style={styles.label}>Confirm New Password</label>
-                <input
-                  style={styles.input}
-                  type="password"
-                  placeholder="Confirm new password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
-
-                <button style={styles.redButton} onClick={handleChangePassword}>
-                  Update Password
-                </button>
-              </div>
-            )}
           </div>
         </div>
       )}
@@ -468,7 +303,7 @@ const Profil = () => {
   );
 };
 
-// CSS-in-JS Styles
+// CSS-in-JS Styles updated with alignment dimensions from the mockup
 const styles = {
   container: {
     display: "flex",
@@ -500,21 +335,43 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    padding: "20px 0",
+    padding: "30px 0",
   },
   card: {
-    width: "85%",
+    width: "88%",
     maxWidth: "400px",
     backgroundColor: "#fff",
-    borderRadius: "20px",
-    border: "1px solid #ccc",
-    padding: "20px",
+    borderRadius: "28px", /* Smoother curves matching Figma rounded bounding layout */
+    border: "1px solid #777777",
+    padding: "30px 24px",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
     marginBottom: "40px",
     boxSizing: "border-box",
+  },
+  figmaHeaderContainer: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    width: "100%",
+    marginBottom: "25px",
+    gap: "16px"
+  },
+  avatar: {
+    width: "65px",
+    height: "65px",
+    borderRadius: "50%",
+    backgroundColor: "#700909", /* Dark red color fill matching layout mockup branding */
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  greetingText: {
+    fontSize: "22px",
+    fontWeight: "bold",
+    color: "#000000",
   },
   avatarContainer: {
     display: "flex",
@@ -523,17 +380,12 @@ const styles = {
     alignSelf: "flex-start",
     marginBottom: "20px",
   },
-  avatar: {
+  avatarLoggedIn: {
     width: "45px",
     height: "45px",
     borderRadius: "22.5px",
     backgroundColor: "#d32f2f",
     marginRight: "12px",
-  },
-  greetingText: {
-    fontSize: "18px",
-    fontWeight: "bold",
-    color: "#000",
   },
   profileName: {
     fontSize: "16px",
@@ -541,24 +393,23 @@ const styles = {
     color: "#000",
   },
   redButton: {
-    backgroundColor: "#d32f2f",
+    backgroundColor: "#cc1111", /* Matches the bright red button from your reference screen */
     width: "100%",
-    padding: "12px 0",
+    padding: "14px 0",
     borderRadius: "25px",
     alignItems: "center",
-    margin: "8px 0",
+    margin: "4px 0",
     color: "#fff",
     border: "none",
-    fontSize: "16px",
+    fontSize: "18px",
     fontWeight: "bold",
     cursor: "pointer",
-    boxShadow: "0 2px 5px rgba(211, 47, 47, 0.3)",
   },
   orText: {
-    fontSize: "14px",
-    color: "#d32f2f",
-    margin: "6px 0",
-    fontWeight: "bold",
+    fontSize: "15px",
+    color: "#cc1111",
+    margin: "8px 0",
+    fontWeight: "600",
   },
   formTitle: {
     fontSize: "18px",
@@ -766,28 +617,6 @@ const styles = {
     color: "#888",
     cursor: "pointer",
     fontWeight: "bold",
-  },
-  detailBox: {
-    width: "100%",
-    backgroundColor: "#f9f9f9",
-    border: "1px solid #ddd",
-    borderRadius: "15px",
-    padding: "15px",
-    marginBottom: "20px",
-    boxSizing: "border-box",
-  },
-  detailLabel: {
-    fontSize: "11px",
-    color: "#888",
-    textTransform: "uppercase",
-    fontWeight: "bold",
-    margin: "0 0 2px 0",
-  },
-  detailValue: {
-    fontSize: "15px",
-    color: "#000",
-    fontWeight: "bold",
-    margin: "0 0 12px 0",
   },
 };
 
