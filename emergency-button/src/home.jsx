@@ -28,19 +28,35 @@ const SERVICES = [
 function Home() {
   const [open, setOpen] = useState(false);
   const [idx, setIdx] = useState(0);
-  const [isFlickering, setIsFlickering] = useState(false);
+  const [slideDir, setSlideDir] = useState("");
 
   const service = SERVICES[idx];
-  const prev = () => handleIndexChange((idx - 1 + SERVICES.length) % SERVICES.length);
-  const next = () => handleIndexChange((idx + 1) % SERVICES.length);
 
-  // Triggers the flicker transition state when changing selections
-  const handleIndexChange = (newIdx) => {
-    setIsFlickering(true);
+  // Explicitly pass direction for prev and next buttons
+  const prev = () =>
+    handleIndexChange(
+      (idx - 1 + SERVICES.length) % SERVICES.length,
+      "slide-right",
+    );
+  const next = () =>
+    handleIndexChange((idx + 1) % SERVICES.length, "slide-left");
+
+  // Handles index change and triggers directional sliding animation
+  const handleIndexChange = (newIdx, customDir = "") => {
+    let direction = customDir;
+
+    // Auto-calculate direction if clicked directly on cards or dots
+    if (!direction) {
+      const diff = (newIdx - idx + SERVICES.length) % SERVICES.length;
+      direction = diff === 1 ? "slide-left" : "slide-right";
+    }
+
+    setSlideDir(direction);
     setIdx(newIdx);
+
     setTimeout(() => {
-      setIsFlickering(false);
-    }, 250); // Matches the short keyframe animation timing
+      setSlideDir("");
+    }, 300); // Matches the 300ms CSS slide animation timing
   };
 
   const leftIdx = (idx - 1 + SERVICES.length) % SERVICES.length;
@@ -48,7 +64,7 @@ function Home() {
   const orderedServices = [
     { ...SERVICES[leftIdx], originalIndex: leftIdx, position: "left" },
     { ...SERVICES[idx], originalIndex: idx, position: "center" },
-    { ...SERVICES[rightIdx], originalIndex: rightIdx, position: "right" }
+    { ...SERVICES[rightIdx], originalIndex: rightIdx, position: "right" },
   ];
 
   return (
@@ -80,14 +96,16 @@ function Home() {
         <p style={styles.hint}>Tap CALL to open choose service overlay</p>
       </div>
 
-      {/* --- HIGHLY FOCUSED SLIDER SECTION WITH SELECTION FLICKER --- */}
+      {/* --- HIGHLY FOCUSED SLIDER SECTION WITH SMOOTH SLIDING --- */}
       <div style={styles.inlineBoxesContainer}>
         <h3 style={styles.carouselTitle}>Instant Options</h3>
         <p style={styles.carouselSub}>
-          Tap the left or right cards to switch focus, or tap the prominent center card to call
+          Tap the left or right cards to switch focus, or tap the prominent
+          center card to call
         </p>
 
-        <div style={styles.sliderFlexWrapper}>
+        {/* Applied dynamic slideDir class here for smooth horizontal easing */}
+        <div style={styles.sliderFlexWrapper} className={slideDir}>
           {orderedServices.map((item) => {
             const isCenter = item.position === "center";
             return (
@@ -97,30 +115,50 @@ function Home() {
                 onClick={(e) => {
                   if (!isCenter) {
                     e.preventDefault();
-                    handleIndexChange(item.originalIndex);
+                    // Determine slide direction based on which side card was clicked
+                    const dir =
+                      item.position === "right" ? "slide-left" : "slide-right";
+                    handleIndexChange(item.originalIndex, dir);
                   }
                 }}
-                className={isFlickering ? "flicker-anim" : ""}
                 style={{
                   ...styles.panicBoxCard,
                   borderColor: isCenter ? "#a12b2b" : "#e5e4e7",
                   background: isCenter ? "#fff5f5" : "#ffffff",
-                  // Enhanced scale ratio: side cards are kept significantly more compact
-                  width: isCenter ? "38%" : "25%", 
-                  height: isCenter ? "150px" : "95px", 
+                  width: isCenter ? "38%" : "25%",
+                  height: isCenter ? "150px" : "95px",
                   opacity: isCenter ? 1 : 0.35,
                   zIndex: isCenter ? 2 : 1,
                   padding: isCenter ? "16px 8px" : "8px 4px",
-                  boxShadow: isCenter ? "0 6px 14px rgba(161,43,43,0.12)" : "none"
+                  boxShadow: isCenter
+                    ? "0 6px 14px rgba(161,43,43,0.12)"
+                    : "none",
                 }}
               >
-                <div style={{ ...styles.boxIcon, fontSize: isCenter ? "34px" : "22px" }}>{item.icon}</div>
-                <div style={{ ...styles.boxName, fontSize: isCenter ? "14px" : "11px", fontWeight: isCenter ? "700" : "500" }}>{item.name}</div>
-                <div style={{ 
-                  ...styles.boxNumberText, 
-                  fontSize: isCenter ? "16px" : "13px", 
-                  color: isCenter ? "#a12b2b" : "#999" 
-                }}>
+                <div
+                  style={{
+                    ...styles.boxIcon,
+                    fontSize: isCenter ? "34px" : "22px",
+                  }}
+                >
+                  {item.icon}
+                </div>
+                <div
+                  style={{
+                    ...styles.boxName,
+                    fontSize: isCenter ? "14px" : "11px",
+                    fontWeight: isCenter ? "700" : "500",
+                  }}
+                >
+                  {item.name}
+                </div>
+                <div
+                  style={{
+                    ...styles.boxNumberText,
+                    fontSize: isCenter ? "16px" : "13px",
+                    color: isCenter ? "#a12b2b" : "#999",
+                  }}
+                >
                   {item.number}
                 </div>
                 {isCenter && <div style={styles.tapToCallTag}>TAP TO DIAL</div>}
@@ -130,7 +168,7 @@ function Home() {
         </div>
       </div>
 
-      {/* --- Original Modal Popup Overlay (Updated for crisp bold white readability) --- */}
+      {/* --- Original Modal Popup Overlay --- */}
       {open && (
         <div style={styles.overlay} onClick={() => setOpen(false)}>
           <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -154,22 +192,58 @@ function Home() {
 
               <a
                 href={`tel:${service.number}`}
+                className={slideDir}
                 style={{
                   ...styles.serviceCard,
                   background: `linear-gradient(160deg, #1f4e91, #080d1a)`,
                 }}
               >
                 <div style={styles.serviceIcon}>{service.icon}</div>
-                {/* Text attributes forced to bold white for clear layout legibility */}
-                <div style={{ ...styles.serviceName, color: "#ffffff", fontWeight: "bold" }}>{service.name}</div>
-                <div style={{ ...styles.serviceDesc, color: "#ffffff", fontWeight: "bold" }}>{service.desc}</div>
-
-                <div style={styles.numberPill}>
-                  <span style={{ fontSize: 14, color: "#fff", fontWeight: "bold" }}>📞</span>
-                  <span style={{ ...styles.numberText, color: "#ffffff", fontWeight: "bold" }}>{service.number}</span>
+                <div
+                  style={{
+                    ...styles.serviceName,
+                    color: "#ffffff",
+                    fontWeight: "bold",
+                  }}
+                >
+                  {service.name}
+                </div>
+                <div
+                  style={{
+                    ...styles.serviceDesc,
+                    color: "#ffffff",
+                    fontWeight: "bold",
+                  }}
+                >
+                  {service.desc}
                 </div>
 
-                <div style={{ ...styles.tapHint, color: "#ffffff", fontWeight: "bold" }}>TAP TO CALL</div>
+                <div style={styles.numberPill}>
+                  <span
+                    style={{ fontSize: 14, color: "#fff", fontWeight: "bold" }}
+                  >
+                    📞
+                  </span>
+                  <span
+                    style={{
+                      ...styles.numberText,
+                      color: "#ffffff",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {service.number}
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    ...styles.tapHint,
+                    color: "#ffffff",
+                    fontWeight: "bold",
+                  }}
+                >
+                  TAP TO CALL
+                </div>
               </a>
 
               <button style={styles.arrow} onClick={next} aria-label="Next">
@@ -213,20 +287,29 @@ function Home() {
         </div>
       )}
 
-      {/* CSS Styles injection for selection flicker logic */}
+      {/* CSS Styles injection with smooth directional sliding animations */}
       <style>{`
         @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
         @keyframes popIn {
           0% { opacity: 0; transform: translateY(20px) scale(0.95); }
           100% { opacity: 1; transform: translateY(0) scale(1); }
         }
-        @keyframes cardFlicker {
-          0% { opacity: 0.3; transform: scale(0.92); filter: brightness(1.2); }
-          50% { opacity: 0.8; filter: brightness(0.9); }
-          100% { opacity: 1; }
+        
+        /* Smooth Sliding Animation Keyframes */
+        @keyframes slideLeftAnim {
+          0% { transform: translateX(45px); opacity: 0.4; }
+          100% { transform: translateX(0); opacity: 1; }
         }
-        .flicker-anim {
-          animation: cardFlicker 0.22s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        @keyframes slideRightAnim {
+          0% { transform: translateX(-45px); opacity: 0.4; }
+          100% { transform: translateX(0); opacity: 1; }
+        }
+        
+        .slide-left {
+          animation: slideLeftAnim 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+        .slide-right {
+          animation: slideRightAnim 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
         }
       `}</style>
     </div>
@@ -253,7 +336,7 @@ const styles = {
     color: "#fff",
     position: "relative",
     boxShadow: "0 8px 20px rgba(112,9,9,.25)",
-    boxSizing: "border-box"
+    boxSizing: "border-box",
   },
   alertBadge: {
     display: "inline-block",
@@ -309,7 +392,7 @@ const styles = {
     padding: "20px 14px 24px 14px",
     backgroundColor: "#fff",
     boxShadow: "rgba(0, 0, 0, 0.05) 0px 4px 6px -2px",
-    boxSizing: "border-box"
+    boxSizing: "border-box",
   },
   carouselTitle: {
     margin: "0 0 4px 0",
@@ -323,7 +406,7 @@ const styles = {
     fontSize: 12,
     color: "#666",
     textAlign: "center",
-    lineHeight: "140%"
+    lineHeight: "140%",
   },
   sliderFlexWrapper: {
     display: "flex",
@@ -344,23 +427,23 @@ const styles = {
     color: "#333333",
     cursor: "pointer",
     boxSizing: "border-box",
-    transition: "all 0.28s cubic-bezier(0.4, 0, 0.2, 1)"
+    transition: "all 0.28s cubic-bezier(0.4, 0, 0.2, 1)",
   },
   boxIcon: {
     lineHeight: 1,
     marginBottom: 4,
-    transition: "font-size 0.28s ease"
+    transition: "font-size 0.28s ease",
   },
   boxName: {
     textAlign: "center",
     color: "#333333",
     marginBottom: 2,
     whiteSpace: "nowrap",
-    transition: "font-size 0.28s ease"
+    transition: "font-size 0.28s ease",
   },
   boxNumberText: {
     fontWeight: "800",
-    transition: "all 0.28s ease"
+    transition: "all 0.28s ease",
   },
   tapToCallTag: {
     fontSize: "8px",

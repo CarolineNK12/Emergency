@@ -34,6 +34,8 @@ function ParticleBackground({
       height = 0,
       raf = 0;
     const mouse = { x: -9999, y: -9999 };
+    // temporary burst particles for click "boom" effects
+    let bursts = [];
 
     function hexToRgba(hex, a) {
       const r = parseInt(hex.slice(1, 3), 16);
@@ -83,8 +85,28 @@ function ParticleBackground({
       mouse.x = -9999;
       mouse.y = -9999;
     }
+    function onMouseClick(e) {
+      // spawn a short lived burst at the click position
+      const rectX = e.clientX;
+      const rectY = e.clientY;
+      const count = 36;
+      for (let i = 0; i < count; i++) {
+        const ang = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.4;
+        const speedRand = 1 + Math.random() * 3;
+        bursts.push({
+          x: rectX,
+          y: rectY,
+          vx: Math.cos(ang) * speedRand,
+          vy: Math.sin(ang) * speedRand,
+          r: 1 + Math.random() * 3,
+          life: 1,
+          decay: 0.02 + Math.random() * 0.04,
+        });
+      }
+    }
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseout", onMouseOut);
+    window.addEventListener("click", onMouseClick);
     window.addEventListener("resize", resize);
 
     function frame() {
@@ -149,6 +171,26 @@ function ParticleBackground({
       });
       ctx.shadowBlur = 0;
 
+      // ---- bursts (click booms) ----
+      for (let i = bursts.length - 1; i >= 0; i--) {
+        const b = bursts[i];
+        b.x += b.vx * 1.8;
+        b.y += b.vy * 1.8;
+        b.vx *= 0.98;
+        b.vy *= 0.98;
+        b.life -= b.decay;
+        if (b.life <= 0) {
+          bursts.splice(i, 1);
+          continue;
+        }
+        ctx.globalAlpha = Math.max(0, Math.min(1, b.life));
+        ctx.fillStyle = hexToRgba(color, Math.max(0.08, b.life * 0.9));
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+
       raf = requestAnimationFrame(frame);
     }
     frame();
@@ -157,6 +199,7 @@ function ParticleBackground({
       cancelAnimationFrame(raf);
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseout", onMouseOut);
+      window.removeEventListener("click", onMouseClick);
       window.removeEventListener("resize", resize);
     };
   }, [
