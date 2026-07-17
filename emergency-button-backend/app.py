@@ -1,5 +1,5 @@
 import os
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -12,7 +12,7 @@ engine = create_engine(f"sqlite:///{DB_PATH}", future=True)
 @app.after_request
 def add_cors_headers(response):
     response.headers["Access-Control-Allow-Origin"] = "*"
-    response.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
     response.headers["Access-Control-Allow-Headers"] = "Content-Type"
     return response
 
@@ -26,9 +26,12 @@ def init_db():
         with get_connection() as conn:
             conn.execute(text("""
                 CREATE TABLE IF NOT EXISTS Users (
-                    id INTEGER PRIMARY KEY,
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
                     username TEXT NOT NULL,
-                    phone_number INTEGER
+                    email TEXT UNIQUE,
+                    password TEXT,
+                    emergency_relation TEXT,
+                    emergency_phone TEXT
                 )
             """))
             conn.execute(text("""
@@ -284,12 +287,135 @@ def home():
 def handle_db_error(message):
     return jsonify({"error": message}), 500
 
+@app.route("/api/signup", methods=["POST"])
+def signup():
+    data = request.json
+    username = data.get("fullName")
+    email = data.get("email")
+    password = data.get("password")
+    emergency_relation = data.get("familyType", "Family")
+    emergency_phone = data.get("familyNumber")
 
+    if not email or not password or not username:
+        return jsonify({"error": "Please fill in all required fields!"}), 400
+
+    try:
+        with get_connection() as conn:
+            existing = conn.execute(
+                text("SELECT id FROM Users WHERE email = :email"), 
+                {"email": email}
+            ).fetchone()
+            
+            if existing:
+                return jsonify({"error": "This Gmail is already registered!"}), 409
+
+            conn.execute(text("""
+                INSERT INTO Users (username, email, password, emergency_relation, emergency_phone)
+                VALUES (:username, :email, :password, :emergency_relation, :emergency_phone)
+            """), {
+                "username": username,
+                "email": email,
+                "password": password,
+                "emergency_relation": emergency_relation,
+                "emergency_phone": emergency_phone
+            })
+            conn.commit()
+
+        return jsonify({
+            "message": "Sign up successful!",
+            "user": {
+                "name": username,
+                "email": email,
+                "emergencyContact": {
+                    "relation": emergency_relation,
+                    "number": emergency_phone
+                }
+            }
+        }), 201
+    except SQLAlchemyError as exc:
+        return jsonify({"error": str(exc)}), 500
+
+
+@app.route("/api/login", methods=["POST"])
+def login():
+    data = request.json
+    email = data.get("email")
+    password = data.get("password")
+
+    if email == "shandy@gmail.com" and password == "12345":
+        return jsonify({
+            "message": "Demo login successful",
+            "user": {
+                "name": "Shandy Afrian Mashuri",
+                "email": "shandy@gmail.com",
+                "emergencyContact": {
+                    "relation": "Mom",
+                    "number": "0812 3459 3987"
+                }
+            }
+        }), 200
+
+    try:
+        with get_connection() as conn:
+            user = conn.execute(text("""
+                SELECT username, email, emergency_relation, emergency_phone
+                FROM Users
+                WHERE email = :email AND password = :password
+            """), {"email": email, "password": password}).fetchone()
+
+            if not user:
+                return jsonify({"error": "Invalid email or password!"}), 401
+
+            return jsonify({
+                "message": "Login successful",
+                "user": {
+                    "name": user.username,
+                    "email": user.email,
+                    "emergencyContact": {
+                        "relation": user.emergency_relation or "Family",
+                        "number": user.emergency_phone or "-"
+                    }
+                }
+            }), 200
+    except SQLAlchemyError as exc:
+        return jsonify({"error": str(exc)}), 500
+
+@app.route("/api/change-password", methods=["POST"])
+def change_password():
+    data = request.json
+    email = data.get("email")
+    old_password = data.get("oldPassword")
+    new_password = data.get("newPassword")
+
+    try:
+        with get_connection() as conn:
+            # Verify user and old password
+            user = conn.execute(text("""
+                SELECT id FROM Users 
+                WHERE email = :email AND password = :old_password
+            """), {"email": email, "old_password": old_password}).fetchone()
+
+            if not user:
+                return jsonify({"error": "Incorrect current password!"}), 401
+
+            # Update to new password
+            conn.execute(text("""
+                UPDATE Users SET password = :new_password 
+                WHERE email = :email
+            """), {"new_password": new_password, "email": email})
+            conn.commit()
+
+        return jsonify({"message": "Password updated successfully!"}), 200
+    except SQLAlchemyError as exc:
+        return jsonify({"error": str(exc)}), 500
+    
 @app.route("/api/users")
 def get_users():
     try:
         with get_connection() as conn:
-            rows = conn.execute(text("SELECT id, username, phone_number FROM Users ORDER BY id")).fetchall()
+            rows = conn.execute(text(
+                "SELECT id, username, email, emergency_relation, emergency_phone FROM Users ORDER BY id"
+            )).fetchall()
         return jsonify({"users": [dict(zip(row._fields, row)) for row in rows]})
     except SQLAlchemyError as exc:
         return handle_db_error(str(exc))

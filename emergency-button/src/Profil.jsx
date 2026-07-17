@@ -26,7 +26,7 @@ const Profil = () => {
     },
   });
 
-  // Handle Login (Checks for demo account or loads default demo data)
+  // Handle Login
   const handleLogin = () => {
     if (email === "shandy@gmail.com" || email === "") {
       setUserData({
@@ -58,18 +58,28 @@ const Profil = () => {
 
   return (
     <div style={styles.container}>
-      {/* Title Header */}
+      {/* Title Header matching the top layout format of the other screens */}
       <div style={styles.titleContainer}>
         <h1 style={styles.titleText}>Profile</h1>
       </div>
 
       <div style={styles.scrollContainer}>
-        {/* ================= GUEST VIEW ================= */}
+        {/* ================= GUEST VIEW (Restructured to match Figma Design) ================= */}
         {currentView === "guest" && (
           <div style={styles.card}>
-            <div style={styles.avatarContainer}>
-              <div style={styles.avatar} />
-              <span style={styles.greetingText}>Hello Guest</span>
+            {/* Vertically stacked header items per Figma mockup specs */}
+            <div style={styles.figmaHeaderContainer}>
+              <span style={styles.greetingText}>Hello, Guest!</span>
+              
+              {/* Profile Avatar Icon with inner vector symbol design */}
+              <div style={styles.avatar}>
+                <svg 
+                  viewBox="0 0 24 24" 
+                  style={{ width: "38px", height: "38px", fill: "#ffffff" }}
+                >
+                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
+              </div>
             </div>
 
             <button
@@ -100,7 +110,7 @@ const Profil = () => {
         {currentView === "profile" && (
           <div style={styles.card}>
             <div style={styles.avatarContainer}>
-              <div style={styles.avatar} />
+              <div style={styles.avatarLoggedIn} />
               <span style={styles.profileName}>{userData.name}</span>
             </div>
 
@@ -144,7 +154,6 @@ const Profil = () => {
       {modalView !== "none" && (
         <div style={styles.modalOverlay}>
           <div style={styles.modalContent}>
-            {/* Close Button [X] */}
             <button
               style={styles.closeButton}
               onClick={() => setModalView("none")}
@@ -215,7 +224,6 @@ const Profil = () => {
                   placeholder="Your Gmail"
                 />
 
-                {/* --- Interactive Dropdown for Family and Siblings --- */}
                 <label style={styles.label}>Family and Siblings</label>
                 {!showFamilyDropdown ? (
                   <div
@@ -295,7 +303,7 @@ const Profil = () => {
   );
 };
 
-// CSS-in-JS Styles
+// CSS-in-JS Styles updated with alignment dimensions from the mockup
 const styles = {
   container: {
     display: "flex",
@@ -327,21 +335,43 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    padding: "20px 0",
+    padding: "30px 0",
   },
   card: {
-    width: "85%",
+    width: "88%",
     maxWidth: "400px",
     backgroundColor: "#fff",
-    borderRadius: "20px",
-    border: "1px solid #ccc",
-    padding: "20px",
+    borderRadius: "28px", /* Smoother curves matching Figma rounded bounding layout */
+    border: "1px solid #777777",
+    padding: "30px 24px",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
     marginBottom: "40px",
     boxSizing: "border-box",
+  },
+  figmaHeaderContainer: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    width: "100%",
+    marginBottom: "25px",
+    gap: "16px"
+  },
+  avatar: {
+    width: "65px",
+    height: "65px",
+    borderRadius: "50%",
+    backgroundColor: "#700909", /* Dark red color fill matching layout mockup branding */
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  greetingText: {
+    fontSize: "22px",
+    fontWeight: "bold",
+    color: "#000000",
   },
   avatarContainer: {
     display: "flex",
@@ -350,17 +380,12 @@ const styles = {
     alignSelf: "flex-start",
     marginBottom: "20px",
   },
-  avatar: {
+  avatarLoggedIn: {
     width: "45px",
     height: "45px",
     borderRadius: "22.5px",
     backgroundColor: "#d32f2f",
     marginRight: "12px",
-  },
-  greetingText: {
-    fontSize: "18px",
-    fontWeight: "bold",
-    color: "#000",
   },
   profileName: {
     fontSize: "16px",
@@ -368,24 +393,23 @@ const styles = {
     color: "#000",
   },
   redButton: {
-    backgroundColor: "#d32f2f",
+    backgroundColor: "#cc1111", /* Matches the bright red button from your reference screen */
     width: "100%",
-    padding: "12px 0",
+    padding: "14px 0",
     borderRadius: "25px",
     alignItems: "center",
-    margin: "8px 0",
+    margin: "4px 0",
     color: "#fff",
     border: "none",
-    fontSize: "16px",
+    fontSize: "18px",
     fontWeight: "bold",
     cursor: "pointer",
-    boxShadow: "0 2px 5px rgba(211, 47, 47, 0.3)",
   },
   orText: {
-    fontSize: "14px",
-    color: "#d32f2f",
-    margin: "6px 0",
-    fontWeight: "bold",
+    fontSize: "15px",
+    color: "#cc1111",
+    margin: "8px 0",
+    fontWeight: "600",
   },
   formTitle: {
     fontSize: "18px",
@@ -431,7 +455,6 @@ const styles = {
     boxSizing: "border-box",
     outline: "none",
   },
-  /* --- DROPDOWN STYLES --- */
   dropdownTrigger: {
     width: "100%",
     height: "42px",

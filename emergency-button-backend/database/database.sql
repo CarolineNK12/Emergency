@@ -2,11 +2,14 @@
 CREATE DATABASE IF NOT EXISTS emergencydb;
 USE emergencydb;
 
--- Users table
+-- Users table (Updated to support login & emergency contact details)
 CREATE TABLE IF NOT EXISTS Users (
-    id INT PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(100) NOT NULL,
-    phone_number INT
+    email VARCHAR(150) UNIQUE,
+    password VARCHAR(255),
+    emergency_relation VARCHAR(50),
+    emergency_phone VARCHAR(50)
 );
 
 -- Alerts table
@@ -30,8 +33,8 @@ CREATE TABLE IF NOT EXISTS Questions (
 );
 
 -- Dummy data
-INSERT INTO Users (id, username, phone_number)
-VALUES (1, 'Joe', 0123456789);
+INSERT INTO Users (id, username, email, password, emergency_relation, emergency_phone)
+VALUES (1, 'Joe', 'joe@gmail.com', 'secret123', 'Brother', '08123456789');
 
 INSERT INTO Alerts (id, name, area, severity)
 VALUES (1, 'Earthquake', 'Bogor', 'Magnitude 4');

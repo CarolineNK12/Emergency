@@ -435,6 +435,40 @@ export default function Maps() {
     gap: 6,
   });
 
+  const StatColumn = ({ icon, count, label, color }) => (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <div style={{ fontSize: 32, marginBottom: "6px" }}>{icon}</div>
+      <div
+        style={{
+          fontSize: 22,
+          fontWeight: 800,
+          color,
+          marginBottom: "0px",
+          lineHeight: "1",
+        }}
+      >
+        {count}
+      </div>
+      <div
+        style={{
+          fontSize: 12,
+          fontWeight: 600,
+          marginTop: "4px",
+          lineHeight: "1",
+        }}
+      >
+        {label}
+      </div>
+    </div>
+  );
+
   return (
     <div className="maps-screen">
       <div className="maps-top-accent">
@@ -561,41 +595,33 @@ export default function Maps() {
                 style={{
                   display: "grid",
                   gridTemplateColumns: "repeat(3, 1fr)",
-                  gap: 12,
+                  gap: "10px",
+                  marginTop: "12px",
                 }}
               >
-                <div>
-                  <div style={{ fontSize: 32 }}>🏥</div>
-                  <div
-                    style={{ fontSize: 26, fontWeight: 800, color: "#e74c3c" }}
-                  >
-                    {loading ? "…" : counts.hospital}
-                  </div>
-                  <div style={{ fontSize: 12 }}>Hospitals</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: 32 }}>👮</div>
-                  <div
-                    style={{ fontSize: 26, fontWeight: 800, color: "#3498db" }}
-                  >
-                    {loading ? "…" : counts.police}
-                  </div>
-                  <div style={{ fontSize: 12 }}>Police</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: 32 }}>🚒</div>
-                  <div
-                    style={{ fontSize: 26, fontWeight: 800, color: "#e67e22" }}
-                  >
-                    {loading ? "…" : counts.fire}
-                  </div>
-                  <div style={{ fontSize: 12 }}>Fire Stations</div>
-                </div>
+                <StatColumn
+                  icon="🏥"
+                  count={loading ? "…" : counts.hospital}
+                  label="Hospitals"
+                  color="#e74c3c"
+                />
+                <StatColumn
+                  icon="👮"
+                  count={loading ? "…" : counts.police}
+                  label="Police"
+                  color="#3498db"
+                />
+                <StatColumn
+                  icon="🚒"
+                  count={loading ? "…" : counts.fire}
+                  label="Fire Stations"
+                  color="#e67e22"
+                />
               </div>
 
               <div
                 style={{
-                  marginTop: 16,
+                  marginTop: 5,
                   fontSize: 12,
                   color: "#a12b2b",
                   fontWeight: 600,
