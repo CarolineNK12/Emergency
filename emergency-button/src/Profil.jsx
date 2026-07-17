@@ -70,14 +70,14 @@ const Profil = () => {
             {/* Vertically stacked header items per Figma mockup specs */}
             <div style={styles.figmaHeaderContainer}>
               <span style={styles.greetingText}>Hello, Guest!</span>
-              
+
               {/* Profile Avatar Icon with inner vector symbol design */}
               <div style={styles.avatar}>
-                <svg 
-                  viewBox="0 0 24 24" 
+                <svg
+                  viewBox="0 0 24 24"
                   style={{ width: "38px", height: "38px", fill: "#ffffff" }}
                 >
-                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
                 </svg>
               </div>
             </div>
@@ -341,7 +341,8 @@ const styles = {
     width: "88%",
     maxWidth: "400px",
     backgroundColor: "#fff",
-    borderRadius: "28px", /* Smoother curves matching Figma rounded bounding layout */
+    borderRadius:
+      "28px" /* Smoother curves matching Figma rounded bounding layout */,
     border: "1px solid #777777",
     padding: "30px 24px",
     display: "flex",
@@ -357,13 +358,14 @@ const styles = {
     alignItems: "center",
     width: "100%",
     marginBottom: "25px",
-    gap: "16px"
+    gap: "16px",
   },
   avatar: {
     width: "65px",
     height: "65px",
     borderRadius: "50%",
-    backgroundColor: "#700909", /* Dark red color fill matching layout mockup branding */
+    backgroundColor:
+      "#700909" /* Dark red color fill matching layout mockup branding */,
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
@@ -393,7 +395,8 @@ const styles = {
     color: "#000",
   },
   redButton: {
-    backgroundColor: "#cc1111", /* Matches the bright red button from your reference screen */
+    backgroundColor:
+      "#cc1111" /* Matches the bright red button from your reference screen */,
     width: "100%",
     padding: "14px 0",
     borderRadius: "25px",
@@ -579,22 +582,22 @@ const styles = {
   },
   modalOverlay: {
     position: "fixed",
-    top: 0,
-    left: 0,
-    width: "100vw",
-    height: "100vh",
+    inset: 0,
     backgroundColor: "rgba(0, 0, 0, 0.65)",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
     zIndex: 1000,
+    padding: "16px",
+    boxSizing: "border-box",
   },
   modalContent: {
     backgroundColor: "#fff",
     borderRadius: "25px",
     padding: "25px",
-    width: "88%",
+    width: "min(380px, 100%)",
     maxWidth: "380px",
+    margin: "0 auto",
     position: "relative",
     boxShadow: "0 10px 25px rgba(0,0,0,0.3)",
     maxHeight: "90vh",
