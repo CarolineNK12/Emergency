@@ -24,8 +24,14 @@ def get_connection():
 def init_db():
     try:
         with get_connection() as conn:
+            # Drop tables first so we can completely reset the schema and data on restart
+            conn.execute(text("DROP TABLE IF EXISTS Users"))
+            conn.execute(text("DROP TABLE IF EXISTS Alerts"))
+            conn.execute(text("DROP TABLE IF EXISTS Questions"))
+
+            # 1. Recreate clean tables
             conn.execute(text("""
-                CREATE TABLE IF NOT EXISTS Users (
+                CREATE TABLE Users (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     username TEXT NOT NULL,
                     email TEXT UNIQUE,
@@ -35,7 +41,7 @@ def init_db():
                 )
             """))
             conn.execute(text("""
-                CREATE TABLE IF NOT EXISTS Alerts (
+                CREATE TABLE Alerts (
                     id INTEGER PRIMARY KEY,
                     name TEXT NOT NULL,
                     area TEXT,
@@ -43,7 +49,7 @@ def init_db():
                 )
             """))
             conn.execute(text("""
-                CREATE TABLE IF NOT EXISTS Questions (
+                CREATE TABLE Questions (
                     id INTEGER PRIMARY KEY,
                     question TEXT NOT NULL,
                     answer1 TEXT,
@@ -55,25 +61,35 @@ def init_db():
                 )
             """))
 
-            conn.execute(text("SELECT COUNT(*) FROM Users")).fetchone()
-            user_count = conn.execute(text("SELECT COUNT(*) FROM Users")).fetchone()[0]
-            if user_count == 0:
-                conn.execute(text("INSERT INTO Users (id, username, phone_number) VALUES (:id, :username, :phone_number)"), {
-                    "id": 1,
-                    "username": "Joe",
-                    "phone_number": 123456789,
-                })
+            # 2. Seed a clean demo user matching the schema columns
+            conn.execute(text("""
+                INSERT INTO Users (id, username, email, password, emergency_relation, emergency_phone) 
+                VALUES (:id, :username, :email, :password, :emergency_relation, :emergency_phone)
+            """), {
+                "id": 1,
+                "username": "Joe",
+                "email": "joe@gmail.com",
+                "password": "secret123",
+                "emergency_relation": "Brother",
+                "emergency_phone": "08123456789"
+            })
 
-            alert_count = conn.execute(text("SELECT COUNT(*) FROM Alerts")).fetchone()[0]
-            if alert_count == 0:
-                conn.execute(text("INSERT INTO Alerts (id, name, area, severity) VALUES (:id, :name, :area, :severity)"), {
-                    "id": 1,
-                    "name": "Earthquake",
-                    "area": "Bogor",
-                    "severity": "Magnitude 4",
-                })
+            # 3. Seed Alerts
+            alerts_to_seed = [
+                (1, 'Earthquake', 'Bogor, Sentul', 'Magnitude 4'),
+                (2, 'Flooding', 'Jakarta, Cilandak', 'Severe'),
+                (3, 'Tsunami', 'Bali, Denpasar', 'High'),
+                (4, 'Wild Fire', 'Tangerang Selatan, Alam Sutera', 'Severe'),
+                (5, 'Landslide', 'Bandung, Lembang', 'Moderate'),
+                (6, 'Volcanic Activity', 'Yogyakarta, Merapi', 'Warning Level 3')
+            ]
+            for alert in alerts_to_seed:
+                conn.execute(text("""
+                    INSERT INTO Alerts (id, name, area, severity) 
+                    VALUES (:id, :name, :area, :severity)
+                """), {"id": alert[0], "name": alert[1], "area": alert[2], "severity": alert[3]})
 
-            question_count = conn.execute(text("SELECT COUNT(*) FROM Questions")).fetchone()[0]
+            # 4. Seed Questions
             seed_questions = [
                 {
                     "id": 1,
@@ -236,34 +252,34 @@ def init_db():
                     "successmessage": "Outstanding! Heat stroke is a true medical emergency; cooling their core temperature takes absolute priority.",
                 },
             ]
-            if question_count < len(seed_questions):
-                for row in seed_questions:
-                    conn.execute(text("""
-                        INSERT OR IGNORE INTO Questions (
-                            id,
-                            question,
-                            answer1,
-                            answer2,
-                            answer3,
-                            answer4,
-                            realanswer,
-                            successmessage
-                        ) VALUES (
-                            :id,
-                            :question,
-                            :answer1,
-                            :answer2,
-                            :answer3,
-                            :answer4,
-                            :realanswer,
-                            :successmessage
-                        )
-                    """), row)
+            
+            for row in seed_questions:
+                conn.execute(text("""
+                    INSERT OR IGNORE INTO Questions (
+                        id,
+                        question,
+                        answer1,
+                        answer2,
+                        answer3,
+                        answer4,
+                        realanswer,
+                        successmessage
+                    ) VALUES (
+                        :id,
+                        :question,
+                        :answer1,
+                        :answer2,
+                        :answer3,
+                        :answer4,
+                        :realanswer,
+                        :successmessage
+                    )
+                """), row)
 
             conn.commit()
         return True
     except SQLAlchemyError as exc:
-        print(f"Database connection failed during initialization: {exc}")
+        print(f"Database initialization failed: {exc}")
         return False
 
 
@@ -320,6 +336,8 @@ def signup():
                 "emergency_phone": emergency_phone
             })
             conn.commit()
+
+        
 
         return jsonify({
             "message": "Sign up successful!",
@@ -447,7 +465,7 @@ def get_questions():
 def get_all_data():
     try:
         with get_connection() as conn:
-            users = [dict(zip(row._fields, row)) for row in conn.execute(text("SELECT id, username, phone_number FROM Users ORDER BY id")).fetchall()]
+            users = [dict(zip(row._fields, row)) for row in conn.execute(text("SELECT id, username, emergency_phone FROM Users ORDER BY id")).fetchall()]
             alerts = [dict(zip(row._fields, row)) for row in conn.execute(text("SELECT id, name, area, severity FROM Alerts ORDER BY id")).fetchall()]
             questions = [dict(zip(row._fields, row)) for row in conn.execute(text(
                 "SELECT id, question, answer1, answer2, answer3, answer4, realanswer, successmessage FROM Questions ORDER BY id"

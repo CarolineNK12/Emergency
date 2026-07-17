@@ -37,8 +37,12 @@ INSERT INTO Users (id, username, email, password, emergency_relation, emergency_
 VALUES (1, 'Joe', 'joe@gmail.com', 'secret123', 'Brother', '08123456789');
 
 INSERT INTO Alerts (id, name, area, severity)
-VALUES (1, 'Earthquake', 'Bogor', 'Magnitude 4');
-
+VALUES (1, 'Earthquake', 'Bogor, Sentul', 'Magnitude 4'),
+       (2, 'Flooding', 'Jakarta, Cilandak', 'Severe'),
+       (3, 'Tsunami', 'Bali, Denpasar', 'High'),
+       (4, 'Wild Fire', 'Tangerang Selatan, Alam Sutera', 'Severe'),
+       (5, 'Landslide', 'Bandung, Lembang', 'Moderate'),
+       (6, 'Volcanic Activity', 'Yogyakarta, Merapi', 'Warning Level 3');
 
 -- LEVEL 1: Basics & SOS Universal Call
 INSERT INTO Questions (id, question, answer1, answer2, answer3, answer4, realanswer, successmessage) VALUES
