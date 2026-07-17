@@ -71,18 +71,26 @@ function Home() {
     <div style={styles.screen}>
       {/* --- Emergency Alert Card (top) --- */}
       <div style={styles.alertCard}>
-        <div style={styles.alertBadge}>Emergency Alert</div>
-        <h2 style={styles.alertTitle}>
-          Help is always
-          <br />
-          there for you
-        </h2>
-        <span style={styles.tag247}>⏰ 24/7 Service</span>
+        <div style={styles.orbOne} />
+        <div style={styles.orbTwo} />
+        <div style={styles.alertTopRow}>
+          <span style={styles.alertBadge}>Emergency Alert</span>
+          <span style={styles.tag247}>24/7 Available</span>
+        </div>
+        <h2 style={styles.alertTitle}>Help is always there for you</h2>
+        <p style={styles.alertSubtitle}>
+          Fast access to emergency support, first aid guidance, and trusted service options.
+        </p>
+        <div style={styles.alertChipRow}>
+          <span style={styles.alertChip}>🚑 Medical</span>
+          <span style={styles.alertChip}>🚒 Fire</span>
+          <span style={styles.alertChip}>👮 Police</span>
+        </div>
       </div>
 
       {/* --- Emergency Button section --- */}
       <div style={styles.callSection}>
-        <h1 style={styles.callTitle}>Emergency Button</h1>
+        <h1 style={styles.callTitle}>Emergency Support</h1>
 
         <button
           className="sosbutton"
@@ -90,10 +98,10 @@ function Home() {
             setOpen(true);
           }}
         >
-          CALL
+          📞 Call Now
         </button>
 
-        <p style={styles.hint}>Tap CALL to open choose service overlay</p>
+        <p style={styles.hint}>Tap to open the phone-style service picker</p>
       </div>
 
       {/* --- HIGHLY FOCUSED SLIDER SECTION WITH SMOOTH SLIDING --- */}
@@ -125,13 +133,14 @@ function Home() {
                   ...styles.panicBoxCard,
                   borderColor: isCenter ? "#a12b2b" : "#e5e4e7",
                   background: isCenter ? "#fff5f5" : "#ffffff",
-                  width: isCenter ? "38%" : "25%",
-                  height: isCenter ? "150px" : "95px",
-                  opacity: isCenter ? 1 : 0.35,
+                  width: isCenter ? "46%" : "30%",
+                  height: isCenter ? "170px" : "112px",
+                  opacity: isCenter ? 1 : 0.4,
                   zIndex: isCenter ? 2 : 1,
-                  padding: isCenter ? "16px 8px" : "8px 4px",
+                  padding: isCenter ? "18px 10px" : "12px 8px",
+                  borderRadius: 18,
                   boxShadow: isCenter
-                    ? "0 6px 14px rgba(161,43,43,0.12)"
+                    ? "0 8px 18px rgba(161,43,43,0.14)"
                     : "none",
                 }}
               >
@@ -335,8 +344,36 @@ const styles = {
     padding: "18px 20px",
     color: "#fff",
     position: "relative",
+    overflow: "hidden",
     boxShadow: "0 8px 20px rgba(112,9,9,.25)",
     boxSizing: "border-box",
+  },
+  orbOne: {
+    position: "absolute",
+    width: 120,
+    height: 120,
+    borderRadius: "50%",
+    background: "radial-gradient(circle, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0) 70%)",
+    top: -30,
+    right: -20,
+    animation: "floatOrb 8s ease-in-out infinite",
+  },
+  orbTwo: {
+    position: "absolute",
+    width: 90,
+    height: 90,
+    borderRadius: "50%",
+    background: "radial-gradient(circle, rgba(255, 92, 92, 0.28) 0%, rgba(255, 92, 92, 0) 70%)",
+    bottom: -25,
+    left: -10,
+    animation: "floatOrb 7s ease-in-out infinite reverse",
+  },
+  alertTopRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 8,
   },
   alertBadge: {
     display: "inline-block",
@@ -346,19 +383,22 @@ const styles = {
     fontSize: 11,
     fontWeight: 700,
     letterSpacing: 0.4,
-    marginBottom: 8,
   },
   alertTitle: {
-    margin: 0,
+    margin: "0 0 8px 0",
     fontSize: 22,
     lineHeight: 1.2,
     fontWeight: 800,
     color: "#fff",
   },
+  alertSubtitle: {
+    margin: 0,
+    color: "rgba(255,255,255,0.9)",
+    fontSize: 13,
+    lineHeight: 1.5,
+    maxWidth: 320,
+  },
   tag247: {
-    position: "absolute",
-    bottom: 12,
-    right: 14,
     background: "#fff",
     color: "#a12b2b",
     borderRadius: 999,
@@ -366,6 +406,20 @@ const styles = {
     fontSize: 11,
     fontWeight: 700,
     boxShadow: "0 2px 5px rgba(0,0,0,.1)",
+  },
+  alertChipRow: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 12,
+  },
+  alertChip: {
+    background: "rgba(255,255,255,0.16)",
+    border: "1px solid rgba(255,255,255,0.22)",
+    borderRadius: 999,
+    padding: "6px 10px",
+    fontSize: 11,
+    color: "#fff",
   },
   callSection: {
     display: "flex",
@@ -377,8 +431,9 @@ const styles = {
   callTitle: {
     margin: 0,
     color: "#700909",
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 800,
+    textAlign: "center",
   },
   hint: {
     margin: 0,
