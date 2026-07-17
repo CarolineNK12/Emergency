@@ -1,19 +1,21 @@
 import { useState, useEffect } from 'react'
 import './App.css'
-import Home from './home.jsx'
 
-// 1. Quick Steps data (original)
+// 1. Quick Steps data
 const guideSteps = [
   {
     title: 'Stay calm',
+    icon: '🧘',
     text: 'Pause, breathe, and focus on the next safe step before acting.',
   },
   {
     title: 'Call for help',
+    icon: '📞',
     text: 'Use the emergency button or call your local emergency number right away.',
   },
   {
     title: 'Share essentials',
+    icon: '🗣️',
     text: 'Tell the responder your location, injuries, and any urgent needs.',
   },
 ]
@@ -27,7 +29,7 @@ const firstAidProcedures = {
       'Ensure the area is safe for both you and the victim.',
       'Check responsiveness: tap their shoulder and shout, "Are you okay?".',
       'Call 112 immediately and place the phone on speaker next to you.',
-      'Place your hands in the center of the chest and perform rapid, deep compressions (100–120 per minute to the beat of "Stayin\' Alive").',
+      'Place your hands in the center of the chest and perform rapid, deep compressions (100–120 per minute).',
       'If trained, alternate 30 compressions with 2 rescue breaths.',
     ],
   },
@@ -43,31 +45,39 @@ const firstAidProcedures = {
     ],
   },
   stab: {
-    title: 'Stabbing & Severe Bleeding',
+    title: 'Severe Bleeding',
     description: 'Critical steps to control hemorrhage and maintain stabilization.',
     steps: [
       'Put on gloves if available, and identify the source of bleeding.',
-      'DO NOT remove the knife or object if it is still embedded (it acts as a plug).',
-      'Apply direct, firm pressure on the wound with a clean cloth (or around the object if it is still inside).',
+      'DO NOT remove the object if it is still embedded (it acts as a plug).',
+      'Apply direct, firm pressure on the wound with a clean cloth.',
       'Keep the person lying down and wrap them in a blanket to prevent shock.',
       'Monitor breathing continuously until paramedics arrive.',
     ],
   },
 }
 
+// Clean, calming color palette
+const theme = {
+  primary: '#2563eb', // Calming medical blue
+  primaryLight: '#eff6ff', // Very light blue for backgrounds
+  border: '#e2e8f0', // Soft gray border
+  textDark: '#1e293b',
+  textMuted: '#64748b',
+  white: '#ffffff',
+  success: '#10b981', // Clean green
+  error: '#ef4444',
+  softShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
+}
+
 function GuidePage({ onNavigate }) {
-  // Navigation tabs
   const [activeTab, setActiveTab] = useState('quick')
   const [selectedProcedure, setSelectedProcedure] = useState('cpr')
 
-  // Live Database States for Quiz
   const [questions, setQuestions] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [apiError, setApiError] = useState(null)
 
-  // ==========================================
-  // 10-LEVEL SIMULATOR PROGRESSION CONFIG
-  // ==========================================
   const levelsConfig = [
     { id: 1, name: 'Basics & SOS Universal Call', count: 1, icon: '⭐' },
     { id: 2, name: 'Cardiopulmonary CPR Steps', count: 2, icon: '❤️' },
@@ -81,7 +91,6 @@ function GuidePage({ onNavigate }) {
     { id: 10, name: 'Elite First Aid Master', count: 3, icon: '🏅' }
   ];
 
-  // Interactive Quiz States
   const [currentQuestionIdx, setCurrentQuestionIdx] = useState(0)
   const [selectedOption, setSelectedOption] = useState(null)
   const [isSubmitted, setIsSubmitted] = useState(false)
@@ -89,11 +98,9 @@ function GuidePage({ onNavigate }) {
   const [quizFinished, setQuizFinished] = useState(false)
   const [quizView, setQuizView] = useState('map')
 
-  // Gamification Tracking States
   const [currentLevel, setCurrentLevel] = useState(1)
-  const [unlockedLevels, setUnlockedLevels] = useState([1]) // Level 1 open by default
+  const [unlockedLevels, setUnlockedLevels] = useState([1])
 
-  // Helper calculation to pull the exact slice of questions for the current level
   const getLevelQuestions = () => {
     let startIndex = 0;
     for (let i = 0; i < currentLevel - 1; i++) {
@@ -112,21 +119,16 @@ function GuidePage({ onNavigate }) {
       
       fetch('http://localhost:5000/api/questions')
         .then((res) => {
-          if (!res.ok) throw new Error('Failed to connect to backend server')
+          if (!res.ok) throw new Error('Failed to connect to backend')
           return res.json()
         })
         .then((data) => {
           if (data.questions && data.questions.length > 0) {
-            // Transform the flat database fields into structural arrays for the frontend UI
             const formattedQuestions = data.questions.map((q) => {
-              // Filter out any null database answers safely
               const options = [q.answer1, q.answer2, q.answer3, q.answer4].filter(Boolean)
-              
-              // Robustly find the correct index by comparing lowercase strings
               const correctIndex = options.findIndex(
                 opt => String(opt).toLowerCase().trim() === String(q.realanswer).toLowerCase().trim()
               )
-              
               return {
                 id: q.id,
                 question: q.question,
@@ -150,7 +152,6 @@ function GuidePage({ onNavigate }) {
     }
   }, [activeTab])
 
-  // Reset helper when restarting the quiz game
   const restartQuiz = () => {
     setCurrentQuestionIdx(0)
     setSelectedOption(null)
@@ -171,16 +172,13 @@ function GuidePage({ onNavigate }) {
     const currentQ = activeQuestions[currentQuestionIdx]
     let isCorrect = false
     
-    // UPDATED VALIDATION CHECKER: Safely checks string content directly
     if (currentQ.type === 'multiple_choice') {
       isCorrect = String(currentQ.options[selectedOption]).toLowerCase().trim() === String(currentQ.realAnswer).toLowerCase().trim()
     } else {
       isCorrect = String(selectedOption).toLowerCase().trim() === String(currentQ.realAnswer).toLowerCase().trim()
     }
     
-    if (isCorrect) {
-      setScore((prev) => prev + 1)
-    }
+    if (isCorrect) setScore((prev) => prev + 1)
   }
 
   const handleNext = () => {
@@ -190,8 +188,6 @@ function GuidePage({ onNavigate }) {
       setIsSubmitted(false)
     } else {
       setQuizFinished(true)
-      
-      // SUCCESSFUL LEVEL END: Append the next consecutive tier to the unlocked checklist!
       const nextLevelId = currentLevel + 1
       if (nextLevelId <= 10 && !unlockedLevels.includes(nextLevelId)) {
         setUnlockedLevels((prev) => [...prev, nextLevelId])
@@ -200,115 +196,116 @@ function GuidePage({ onNavigate }) {
   }
 
   return (
-    <>
-      <section id="center">
-        <div>
-          <p style={{ textTransform: 'uppercase', letterSpacing: '0.15em', fontSize: '0.8rem', fontWeight: 600 }}>
-            Interactive safety space
-          </p>
-          <h1>Learn, Practice, and Respond.</h1>
-          <p>
-            Toggle between quick response essentials, complete first aid procedures, or practice vital survival simulations.
-          </p>
-        </div>
+    <div style={{ fontFamily: 'system-ui, sans-serif', color: theme.textDark, width: '100%', boxSizing: 'border-box' }}>
+      <section style={{ textAlign: 'center', padding: '20px 16px 30px' }}>
+        <p style={{ textTransform: 'uppercase', letterSpacing: '0.15em', fontSize: '0.8rem', fontWeight: 600, color: theme.primary }}>
+          Interactive safety space
+        </p>
+        <h1 style={{ margin: '10px 0', fontSize: '2.2rem', color: theme.textDark }}>Learn, Practice, Respond.</h1>
+        <p style={{ color: theme.textMuted, maxWidth: '500px', margin: '0 auto 24px', fontSize: '0.95rem' }}>
+          Toggle between quick response essentials, complete first aid procedures, or practice vital survival simulations.
+        </p>
 
-        {/* 3 Layout Tab Control Toggles */}
-        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '10px' }}>
-          <button 
-            type="button" 
-            className="counter" 
-            style={{ 
-              borderColor: activeTab === 'quick' ? 'var(--accent)' : 'transparent',
-              fontWeight: activeTab === 'quick' ? 'bold' : 'normal',
-              cursor: 'pointer'
-            }}
-            onClick={() => setActiveTab('quick')}
-          >
-            ⚡ Quick Steps
-          </button>
-          <button 
-            type="button" 
-            className="counter" 
-            style={{ 
-              borderColor: activeTab === 'manual' ? 'var(--accent)' : 'transparent',
-              fontWeight: activeTab === 'manual' ? 'bold' : 'normal',
-              cursor: 'pointer'
-            }}
-            onClick={() => setActiveTab('manual')}
-          >
-            📖 First Aid Guide
-          </button>
-          <button 
-            type="button" 
-            className="counter" 
-            style={{ 
-              borderColor: activeTab === 'quiz' ? 'var(--accent)' : 'transparent',
-              fontWeight: activeTab === 'quiz' ? 'bold' : 'normal',
-              cursor: 'pointer'
-            }}
-            onClick={() => setActiveTab('quiz')}
-          >
-            🏆 Emergency Academy
-          </button>
-        </div>
-
-        <div className="home-actions">
-          <a href="tel:+112" className="sosbutton">
-            112
-          </a>
-          <div style={{ marginTop: '16px' }}>
-          </div>
+        {/* Clean, shadowless Tab Controls */}
+        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap', width: '100%' }}>
+          {[
+            { id: 'quick', icon: '⚡', label: 'Quick' },
+            { id: 'manual', icon: '📖', label: 'Guide' },
+            { id: 'quiz', icon: '🏆', label: 'Academy' }
+          ].map(tab => (
+            <button 
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              style={{ 
+                padding: '10px 18px',
+                borderRadius: '99px',
+                border: activeTab === tab.id ? `1px solid ${theme.primary}` : `1px solid ${theme.border}`,
+                background: activeTab === tab.id ? theme.primaryLight : theme.white,
+                color: activeTab === tab.id ? theme.primary : theme.textMuted,
+                fontWeight: activeTab === tab.id ? '600' : '400',
+                cursor: 'pointer',
+                boxShadow: 'none',
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                fontSize: '0.9rem'
+              }}
+            >
+              <span>{tab.icon}</span> {tab.label}
+            </button>
+          ))}
         </div>
       </section>
 
-      <div className="ticks"></div>
-
-      {/* RENDER LAYOUT 1: Quick Steps */}
+      {/* RENDER LAYOUT 1: Quick Steps (Mobile Flex Column) */}
       {activeTab === 'quick' && (
-        <section id="next-steps">
+        <section style={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: '16px', 
+          padding: '0 16px'
+        }}>
           {guideSteps.map((step) => (
-            <div key={step.title}>
-              <h2>{step.title}</h2>
-              <p>{step.text}</p>
+            <div key={step.title} style={{
+              background: theme.white,
+              border: `1px solid ${theme.border}`,
+              borderRadius: '16px',
+              padding: '20px',
+              boxShadow: theme.softShadow,
+              textAlign: 'left'
+            }}>
+              <h2 style={{ color: theme.primary, fontSize: '1.15rem', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '1.2rem', background: theme.primaryLight, padding: '8px', borderRadius: '10px' }}>{step.icon}</span>
+                {step.title}
+              </h2>
+              <p style={{ color: theme.textMuted, fontSize: '0.95rem', lineHeight: '1.5' }}>{step.text}</p>
             </div>
           ))}
         </section>
       )}
 
-      {/* RENDER LAYOUT 2: Step-by-Step with Side Navbar */}
+      {/* RENDER LAYOUT 2: Mobile Stacked View (Swipeable Nav on Top) */}
       {activeTab === 'manual' && (
-        <section id="next-steps" style={{ padding: '0', display: 'flex', flexDirection: 'row', flexWrap: 'wrap' }}>
-          {/* Side Navbar */}
+        <section style={{ 
+          display: 'flex',
+          flexDirection: 'column',
+          background: theme.white,
+          border: `1px solid ${theme.border}`,
+          borderRadius: '16px',
+          overflow: 'hidden',
+          boxShadow: theme.softShadow,
+          margin: '0 16px'
+        }}>
+          {/* Swipeable Horizontal Mobile Navbar */}
           <div style={{ 
-            flex: '1 1 250px', 
-            borderRight: '1px solid var(--border)', 
-            padding: '32px',
-            textAlign: 'left',
             display: 'flex',
-            flexDirection: 'column',
-            gap: '12px'
+            overflowX: 'auto',
+            gap: '10px',
+            padding: '16px',
+            background: '#f8fafc',
+            borderBottom: `1px solid ${theme.border}`,
+            WebkitOverflowScrolling: 'touch', // Smooth scrolling for iOS
           }}>
-            <h2 style={{ fontSize: '1.2rem', textTransform: 'uppercase', color: 'var(--text-h)', letterSpacing: '0.1em' }}>
-              Incidents
-            </h2>
-            <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '4px 0 12px' }} />
-            
             {Object.keys(firstAidProcedures).map((key) => (
               <button
                 key={key}
-                type="button"
-                className="counter"
-                style={{
-                  textAlign: 'left',
-                  width: '100%',
-                  padding: '10px 15px',
-                  margin: '0',
-                  background: selectedProcedure === key ? 'var(--accent-bg)' : 'transparent',
-                  borderColor: selectedProcedure === key ? 'var(--accent-border)' : 'transparent',
-                  cursor: 'pointer',
-                  justifyContent: 'flex-start'
-                }}
                 onClick={() => setSelectedProcedure(key)}
+                style={{
+                  flexShrink: 0, // Prevents the buttons from squishing
+                  padding: '10px 16px',
+                  background: selectedProcedure === key ? theme.primaryLight : theme.white,
+                  border: `1px solid ${selectedProcedure === key ? theme.primary : theme.border}`,
+                  color: selectedProcedure === key ? theme.primary : theme.textDark,
+                  fontWeight: selectedProcedure === key ? '600' : '400',
+                  cursor: 'pointer',
+                  borderRadius: '99px',
+                  transition: 'background 0.2s',
+                  fontSize: '0.9rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
               >
                 {key === 'cpr' && '❤️ '}
                 {key === 'fainting' && '💧 '}
@@ -319,34 +316,30 @@ function GuidePage({ onNavigate }) {
           </div>
 
           {/* Procedure Step Viewer */}
-          <div style={{ flex: '2 1 450px', padding: '32px', textAlign: 'left' }}>
-            <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--accent)', fontWeight: 'bold' }}>
-              Step-by-step treatment
+          <div style={{ padding: '24px 20px', textAlign: 'left', background: theme.white }}>
+            <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: theme.primary, fontWeight: 'bold' }}>
+              Treatment
             </span>
-            <h2 style={{ marginTop: '8px', fontSize: '2rem' }}>{firstAidProcedures[selectedProcedure].title}</h2>
-            <p style={{ fontStyle: 'italic', marginBottom: '24px', color: 'var(--text)' }}>
+            <h2 style={{ margin: '8px 0', fontSize: '1.6rem', color: theme.textDark, lineHeight: '1.2' }}>
+              {firstAidProcedures[selectedProcedure].title}
+            </h2>
+            <p style={{ fontStyle: 'italic', marginBottom: '24px', color: theme.textMuted, fontSize: '0.95rem' }}>
               "{firstAidProcedures[selectedProcedure].description}"
             </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {firstAidProcedures[selectedProcedure].steps.map((step, index) => (
-                <div key={index} style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+                <div key={index} style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
                   <div style={{
-                    minWidth: '28px',
-                    height: '28px',
-                    borderRadius: '50%',
-                    background: 'var(--accent-bg)',
-                    border: '1px solid var(--accent-border)',
-                    color: 'var(--accent)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 'bold',
-                    fontSize: '0.9rem'
+                    minWidth: '28px', height: '28px', borderRadius: '50%',
+                    background: theme.primaryLight,
+                    color: theme.primary,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontWeight: 'bold', fontSize: '0.85rem'
                   }}>
                     {index + 1}
                   </div>
-                  <p style={{ marginTop: '3px', fontSize: '1rem', color: 'var(--text-h)' }}>{step}</p>
+                  <p style={{ marginTop: '3px', fontSize: '0.95rem', color: theme.textDark, lineHeight: '1.5' }}>{step}</p>
                 </div>
               ))}
             </div>
@@ -354,202 +347,126 @@ function GuidePage({ onNavigate }) {
         </section>
       )}
 
-      {/* RENDER LAYOUT 3: Dynamic Flask-Connected Quiz */}
+      {/* RENDER LAYOUT 3: Dynamic Quiz */}
       {activeTab === 'quiz' && (
-        <section id="next-steps" style={{ display: 'block', padding: '32px', textAlign: 'center' }}>
-          <div style={{ maxWidth: '600px', margin: '0 auto', textAlign: 'left' }}>
-            
-            {/* Loading State */}
-            {isLoading && (
-              <p style={{ textAlign: 'center', color: 'var(--text)', fontStyle: 'italic' }}>
-                Fetching dynamic scenarios from Flask Server...
-              </p>
-            )}
+        <section style={{ padding: '0 16px', textAlign: 'center' }}>
+            {isLoading && <p style={{ color: theme.textMuted }}>Fetching scenarios from server...</p>}
 
-            {/* Error State Handler */}
             {apiError && (
-              <div style={{ padding: '20px', border: '1px dashed #ef4444', borderRadius: '8px', background: 'rgba(239, 68, 68, 0.05)', textAlign: 'center' }}>
-                <p style={{ color: '#ef4444', fontWeight: 'bold', marginBottom: '8px' }}>⚠️ Backend Offline</p>
-                <p style={{ fontSize: '0.9rem', color: 'var(--text)' }}>
-                  Could not fetch database questions. Make sure your Flask backend server is running via terminal!
-                </p>
+              <div style={{ padding: '20px', borderRadius: '12px', background: '#fef2f2', border: `1px solid ${theme.error}` }}>
+                <p style={{ color: theme.error, fontWeight: 'bold', marginBottom: '6px' }}>⚠️ Backend Offline</p>
+                <p style={{ fontSize: '0.9rem', color: theme.textMuted }}>Please start your Flask server.</p>
               </div>
             )}
 
-            {/* Live Interactive Game Interface */}
             {!isLoading && !apiError && questions.length > 0 && (
-              <>
+              <div style={{ background: theme.white, borderRadius: '16px', padding: '24px 16px', boxShadow: theme.softShadow, border: `1px solid ${theme.border}` }}>
                 {quizView === 'map' ? (
-                  /* Upgraded 10-Level Dynamic Progression Roadmap Map */
-                  <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px', width: '100%' }}>
-                    <h2 style={{ marginBottom: '25px', textAlign: 'center' }}>Training Path</h2>
-                    
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+                    <h2 style={{ marginBottom: '16px', color: theme.textDark }}>Training Path</h2>
                     {levelsConfig.map((lvl, index) => {
                       const isUnlocked = unlockedLevels.includes(lvl.id);
-                      
                       return (
                         <div key={lvl.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-                          {/* Vector vertical connector road asset line */}
-                          {index > 0 && (
-                            <div style={{ width: '8px', height: '40px', background: isUnlocked ? 'var(--accent)' : 'var(--border)', borderRadius: '4px', margin: '4px 0' }}></div>
-                          )}
+                          {index > 0 && <div style={{ width: '4px', height: '24px', background: isUnlocked ? theme.primary : theme.border, margin: '4px 0' }}></div>}
                           
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: isUnlocked ? 1 : 0.55 }}>
+                          <div style={{ opacity: isUnlocked ? 1 : 0.6, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                             <button 
-                              type="button"
                               disabled={!isUnlocked}
+                              onClick={() => { setCurrentLevel(lvl.id); setQuizView('playing'); restartQuiz(); }}
                               style={{ 
-                                width: '80px', height: '80px', borderRadius: '50%', border: 'none', fontSize: '32px', 
-                                background: isUnlocked ? 'var(--accent)' : 'var(--border)', 
-                                color: 'white', 
-                                boxShadow: isUnlocked ? '0 8px 0 var(--accent-border)' : 'none', 
-                                cursor: isUnlocked ? 'pointer' : 'not-allowed', 
-                                transition: 'transform 0.1s',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center'
-                              }}
-                              onClick={() => { 
-                                setCurrentLevel(lvl.id);
-                                setQuizView('playing'); 
-                                restartQuiz(); 
+                                width: '64px', height: '64px', borderRadius: '50%', border: 'none', fontSize: '24px', 
+                                background: isUnlocked ? theme.primary : theme.border, 
+                                color: 'white', cursor: isUnlocked ? 'pointer' : 'not-allowed', 
                               }}
                             >
                               {isUnlocked ? lvl.icon : '🔒'}
                             </button>
-                            <p style={{ marginTop: '10px', fontWeight: 'bold', color: isUnlocked ? 'var(--text-h)' : 'var(--text)', fontSize: '0.9rem', textAlign: 'center' }}>
-                              Level {lvl.id}: {lvl.name} ({lvl.count} {lvl.count === 1 ? 'Incident' : 'Incidents'})
-                            </p>
+                            <p style={{ marginTop: '8px', fontWeight: '600', color: theme.textDark, fontSize: '0.9rem' }}>Level {lvl.id}: {lvl.name}</p>
                           </div>
                         </div>
                       );
                     })}
                   </div>
                 ) : !quizFinished ? (
-                  /* Dynamic Gameplay Module Frame */
-                  <div>
-                    {/* Visual Progress Bar calculated against active questions */}
-                    <div style={{ width: '100%', height: '8px', background: 'var(--code-bg)', borderRadius: '4px', overflow: 'hidden', marginBottom: '24px' }}>
-                      <div style={{ width: `${activeQuestions.length ? ((currentQuestionIdx + 1) / activeQuestions.length) * 100 : 0}%`, height: '100%', background: 'var(--accent)', transition: 'width 0.3s ease' }}></div>
+                  <div style={{ textAlign: 'left' }}>
+                    <div style={{ width: '100%', height: '8px', background: theme.border, borderRadius: '4px', overflow: 'hidden', marginBottom: '20px' }}>
+                      <div style={{ width: `${((currentQuestionIdx + 1) / activeQuestions.length) * 100}%`, height: '100%', background: theme.primary, transition: 'width 0.3s' }}></div>
+                    </div>
+                    
+                    <h2 style={{ fontSize: '1.15rem', color: theme.textDark, marginBottom: '20px', lineHeight: '1.4' }}>
+                      {activeQuestions[currentQuestionIdx].question}
+                    </h2>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
+                      {activeQuestions[currentQuestionIdx].type === 'multiple_choice' ? (
+                        activeQuestions[currentQuestionIdx].options.map((option, idx) => {
+                          const isSelected = selectedOption === idx;
+                          let optBorder = isSelected ? theme.primary : theme.border;
+                          let optBg = isSelected ? theme.primaryLight : theme.white;
+
+                          if (isSubmitted) {
+                            const correctIdx = activeQuestions[currentQuestionIdx].answerIndex;
+                            if (idx === correctIdx) { optBorder = theme.success; optBg = '#ecfdf5'; } 
+                            else if (isSelected) { optBorder = theme.error; optBg = '#fef2f2'; }
+                          }
+
+                          return (
+                            <button key={idx} onClick={() => handleOptionSelect(idx)}
+                              style={{ 
+                                width: '100%', textAlign: 'left', padding: '14px', borderRadius: '12px', 
+                                border: `2px solid ${optBorder}`, background: optBg, color: theme.textDark, 
+                                cursor: isSubmitted ? 'default' : 'pointer', transition: 'all 0.2s',
+                                fontSize: '0.95rem', lineHeight: '1.4'
+                              }}
+                            >
+                              {option}
+                            </button>
+                          );
+                        })
+                      ) : (
+                        <textarea 
+                          disabled={isSubmitted}
+                          placeholder="Type your response here..."
+                          style={{ width: '100%', padding: '14px', borderRadius: '12px', border: `2px solid ${theme.border}`, minHeight: '100px', boxSizing: 'border-box', fontSize: '0.95rem' }}
+                          onChange={(e) => handleOptionSelect(e.target.value)}
+                          value={selectedOption || ''}
+                        />
+                      )}
                     </div>
 
-                    <p style={{ fontSize: '0.85rem', color: 'var(--text)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '8px' }}>
-                      Level {currentLevel} • Incident {currentQuestionIdx + 1} of {activeQuestions.length || 1}
-                    </p>
-                    
-                    {activeQuestions.length > 0 ? (
-                      <>
-                        <h2 style={{ fontSize: '1.4rem', lineHeight: '135%', color: 'var(--text-h)', marginBottom: '24px' }}>
-                          {activeQuestions[currentQuestionIdx].question}
-                        </h2>
-
-                        {/* DYNAMIC VARIANT SWITCH: Multiple Choice vs Text Essay Fields */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
-                          
-                          {activeQuestions[currentQuestionIdx].type === 'multiple_choice' ? (
-                            activeQuestions[currentQuestionIdx].options.map((option, idx) => {
-                              const isSelected = selectedOption === idx;
-                              let optBorder = isSelected ? 'var(--accent)' : 'var(--border)';
-                              let optBg = isSelected ? 'var(--accent-bg)' : 'transparent';
-
-                              if (isSubmitted) {
-                                const correctIdx = activeQuestions[currentQuestionIdx].answerIndex;
-                                if (idx === correctIdx) {
-                                  optBorder = '#10b981'; optBg = 'rgba(16, 185, 129, 0.1)';
-                                } else if (isSelected && idx !== correctIdx) {
-                                  optBorder = '#ef4444'; optBg = 'rgba(239, 68, 68, 0.1)';
-                                }
-                              }
-
-                              return (
-                                <button
-                                  key={idx} type="button"
-                                  style={{ width: '100%', textAlign: 'left', padding: '16px', borderRadius: '8px', border: `2px solid ${optBorder}`, background: optBg, color: 'var(--text-h)', fontFamily: 'var(--sans)', fontSize: '1rem', cursor: isSubmitted ? 'default' : 'pointer', transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', gap: '12px' }}
-                                  onClick={() => handleOptionSelect(idx)}
-                                >
-                                  <span style={{ width: '24px', height: '24px', borderRadius: '50%', border: `1px solid ${isSelected ? 'var(--accent)' : 'var(--border)'}`, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 'bold', background: isSelected ? 'var(--accent)' : 'transparent', color: isSelected ? 'white' : 'var(--text)' }}>
-                                    {String.fromCharCode(65 + idx)}
-                                  </span>
-                                  {option}
-                                </button>
-                              );
-                            })
-                          ) : (
-                            /* Text Input/Essay Entry Frame */
-                            <textarea 
-                              disabled={isSubmitted}
-                              placeholder="Type your response essay here..."
-                              style={{ width: '100%', padding: '16px', borderRadius: '8px', border: `2px solid ${isSubmitted ? (String(selectedOption).toLowerCase().trim() === String(activeQuestions[currentQuestionIdx].realAnswer).toLowerCase().trim() ? '#10b981' : '#ef4444') : 'var(--accent)'}`, background: 'var(--bg)', color: 'var(--text-h)', fontFamily: 'var(--sans)', fontSize: '1rem', minHeight: '100px', boxSizing: 'border-box' }}
-                              onChange={(e) => handleOptionSelect(e.target.value)}
-                              value={selectedOption || ''}
-                            />
-                          )}
-                        </div>
-
-                        {/* Dynamic Feedback block */}
-                        {isSubmitted && (
-                          <div style={{ padding: '16px', borderRadius: '8px', background: 'var(--code-bg)', borderLeft: `4px solid ${
-                            (activeQuestions[currentQuestionIdx].type === 'multiple_choice' && selectedOption === activeQuestions[currentQuestionIdx].answerIndex) || 
-                            (activeQuestions[currentQuestionIdx].type !== 'multiple_choice' && String(selectedOption).toLowerCase().trim() === String(activeQuestions[currentQuestionIdx].realAnswer).toLowerCase().trim()) 
-                            ? '#10b981' : '#ef4444'
-                          }`, marginBottom: '24px' }}>
-                            <strong style={{ display: 'block', color: 'var(--text-h)', marginBottom: '4px' }}>
-                              { (activeQuestions[currentQuestionIdx].type === 'multiple_choice' && selectedOption === activeQuestions[currentQuestionIdx].answerIndex) || (activeQuestions[currentQuestionIdx].type !== 'multiple_choice' && String(selectedOption).toLowerCase().trim() === String(activeQuestions[currentQuestionIdx].realAnswer).toLowerCase().trim()) ? '🎉 Correct!' : `⚠️ Incorrect. The answer was: ${activeQuestions[currentQuestionIdx].type !== 'multiple_choice' ? activeQuestions[currentQuestionIdx].realAnswer : activeQuestions[currentQuestionIdx].options[activeQuestions[currentQuestionIdx].answerIndex]}` }
-                            </strong>
-                            <p style={{ fontSize: '0.9rem', color: 'var(--text)' }}>
-                              {activeQuestions[currentQuestionIdx].successMessage}
-                            </p>
-                          </div>
-                        )}
-
-                        {/* Controls Footer */}
-                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                          {!isSubmitted ? (
-                            <button type="button" className="counter" disabled={selectedOption === null || selectedOption === ''} style={{ opacity: selectedOption === null || selectedOption === '' ? 0.5 : 1, cursor: selectedOption === null || selectedOption === '' ? 'not-allowed' : 'pointer', margin: 0 }} onClick={handleSubmitAnswer}>
-                              Verify Decision
-                            </button>
-                          ) : (
-                            <button type="button" className="counter" style={{ cursor: 'pointer', margin: 0 }} onClick={handleNext}>
-                              {currentQuestionIdx < activeQuestions.length - 1 ? 'Next Scenario ➡️' : 'Finish Simulator 🏅'}
-                            </button>
-                          )}
-                        </div>
-                      </>
-                    ) : (
-                      <div style={{ padding: '20px', textAlign: 'center' }}>
-                        <p style={{ fontStyle: 'italic', marginBottom: '20px' }}>No questions configured for Level {currentLevel} yet. Add more questions in your SQL database setup!</p>
-                        <button type="button" className="counter" style={{ cursor: 'pointer' }} onClick={() => setQuizView('map')}>🗺️ Back to Map</button>
+                    {isSubmitted && (
+                      <div style={{ padding: '14px', borderRadius: '12px', background: '#f8fafc', borderLeft: `4px solid ${
+                        (activeQuestions[currentQuestionIdx].type === 'multiple_choice' && selectedOption === activeQuestions[currentQuestionIdx].answerIndex) 
+                        ? theme.success : theme.error
+                      }`, marginBottom: '20px' }}>
+                        <p style={{ color: theme.textMuted, margin: 0, fontSize: '0.9rem' }}>{activeQuestions[currentQuestionIdx].successMessage}</p>
                       </div>
                     )}
-                  </div>
-                ) : (
-                  /* Finish Screen Banner */
-                  <div style={{ textAlign: 'center', padding: '24px 0' }}>
-                    <div style={{ fontSize: '4rem', marginBottom: '16px' }}>🏆</div>
-                    <h2>Level {currentLevel} Cleared Successfully!</h2>
-                    <p style={{ fontSize: '1.2rem', color: 'var(--text-h)', margin: '12px 0 24px' }}>
-                      You handled <strong>{score}</strong> out of <strong>{activeQuestions.length}</strong> incidents correctly!
-                    </p>
-                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-                      <button type="button" className="counter" style={{ cursor: 'pointer', margin: 0 }} onClick={restartQuiz}>
-                        🔄 Retry Level
-                      </button>
-                      <button type="button" className="counter" style={{ cursor: 'pointer', margin: 0, background: 'transparent', borderColor: 'var(--border)' }} onClick={() => { restartQuiz(); setQuizView('map'); }}>
-                        🗺️ Back to Map
-                      </button>
+
+                    <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                      {!isSubmitted ? (
+                        <button disabled={selectedOption === null} onClick={handleSubmitAnswer} style={{ padding: '12px 20px', background: theme.primary, color: 'white', borderRadius: '8px', border: 'none', cursor: 'pointer', opacity: selectedOption === null ? 0.5 : 1, fontSize: '0.95rem' }}>Verify Decision</button>
+                      ) : (
+                        <button onClick={handleNext} style={{ padding: '12px 20px', background: theme.primary, color: 'white', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '0.95rem' }}>
+                          {currentQuestionIdx < activeQuestions.length - 1 ? 'Next Scenario ➡️' : 'Finish 🏅'}
+                        </button>
+                      )}
                     </div>
                   </div>
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '30px 0' }}>
+                    <div style={{ fontSize: '3.5rem', marginBottom: '12px' }}>🏆</div>
+                    <h2 style={{ color: theme.textDark, fontSize: '1.5rem', marginBottom: '8px' }}>Level Cleared!</h2>
+                    <p style={{ color: theme.textMuted, marginBottom: '20px', fontSize: '0.95rem' }}>You got {score} out of {activeQuestions.length} correct.</p>
+                    <button onClick={() => { restartQuiz(); setQuizView('map'); }} style={{ padding: '12px 20px', background: theme.primary, color: 'white', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '0.95rem' }}>🗺️ Back to Map</button>
+                  </div>
                 )}
-              </>
+              </div>
             )}
-
-            {/* Secondary fallback check */}
-            {!isLoading && !apiError && questions.length === 0 && (
-              <p style={{ textAlign: 'center', color: 'var(--text)' }}>No questions found inside the database setup.</p>
-            )}
-
-          </div>
         </section>
       )}
-    </>
+    </div>
   )
 }
 
