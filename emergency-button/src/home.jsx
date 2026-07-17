@@ -98,7 +98,7 @@ function Home() {
             setOpen(true);
           }}
         >
-          📞 Call Now
+          CALL
         </button>
 
         <p style={styles.hint}>Tap to open the phone-style service picker</p>
@@ -204,7 +204,7 @@ function Home() {
                 className={slideDir}
                 style={{
                   ...styles.serviceCard,
-                  background: `linear-gradient(160deg, #1f4e91, #080d1a)`,
+                  background: `linear-gradient(160deg, #ef4444, #700909)`,
                 }}
               >
                 <div style={styles.serviceIcon}>{service.icon}</div>
@@ -296,7 +296,7 @@ function Home() {
         </div>
       )}
 
-      {/* CSS Styles injection with smooth directional sliding animations */}
+      {/* CSS Styles injection with smooth directional sliding and pulse wave animations */}
       <style>{`
         @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
         @keyframes popIn {
@@ -319,6 +319,42 @@ function Home() {
         }
         .slide-right {
           animation: slideRightAnim 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+
+        /* Pulsing & Waving Emergency Button Effect */
+        .sosbutton {
+          background: #ef4444;
+          color: #ffffff;
+          border: none;
+          width: 130px;
+          height: 130px;
+          border-radius: 50%;
+          font-size: 24px;
+          font-weight: 800;
+          letter-spacing: 1px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6);
+          animation: pulseWave 1.6s infinite cubic-bezier(0.66, 0, 0, 1);
+          transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .sosbutton:active {
+          transform: scale(0.96);
+        }
+
+        @keyframes pulseWave {
+          0% {
+            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6), 0 0 0 0 rgba(239, 68, 68, 0.4);
+          }
+          50% {
+            box-shadow: 0 0 0 20px rgba(239, 68, 68, 0), 0 0 0 10px rgba(239, 68, 68, 0.4);
+          }
+          100% {
+            box-shadow: 0 0 0 30px rgba(239, 68, 68, 0), 0 0 0 20px rgba(239, 68, 68, 0);
+          }
         }
       `}</style>
     </div>

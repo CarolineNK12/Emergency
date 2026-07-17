@@ -59,8 +59,8 @@ const firstAidProcedures = {
 
 // Clean, calming color palette
 const theme = {
-  primary: '#2563eb', // Calming medical blue
-  primaryLight: '#eff6ff', // Very light blue for backgrounds
+  primary: '#dc2626', // Changed to red
+  primaryLight: '#fef2f2', // Changed to light red for backgrounds
   border: '#e2e8f0', // Soft gray border
   textDark: '#1e293b',
   textMuted: '#64748b',
