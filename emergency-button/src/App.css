@@ -1,10 +1,10 @@
 body {
-    background-color: white;
-    color: black;
+  background-color: white;
+  color: black;
 }
 
 body * {
-    color: black;
+  color: black;
 }
 
 .counter {
@@ -176,7 +176,7 @@ body * {
 
   &::before,
   &::after {
-    content: '';
+    content: "";
     position: absolute;
     top: -4.5px;
     border: 5px solid transparent;
@@ -227,7 +227,6 @@ body * {
   }
 }
 
-
 .maps-screen {
   width: 100%;
   max-width: 480px; /* Framework mockup scaling constraint */
@@ -269,13 +268,13 @@ body * {
 .maps-graphic-wrapper {
   position: relative;
   width: 100%;
-  height: 240px; 
+  height: 240px;
   border: 1px solid #000000;
   border-radius: 20px;
   overflow: hidden;
   margin-bottom: 20px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-  z-index: 1; 
+  z-index: 1;
 }
 
 .maps-display-img {
@@ -296,7 +295,7 @@ body * {
   display: flex;
   align-items: center;
   gap: 6px;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
   white-space: nowrap;
 }
 
@@ -410,7 +409,7 @@ body * {
 }
 
 .page-wrapper {
-  flex: 1; 
+  flex: 1;
   display: flex;
   flex-direction: column;
 }
@@ -421,7 +420,7 @@ body * {
   margin: 0 auto;
   padding: 24px 16px 96px;
   box-sizing: border-box;
-  padding-bottom: 100px
+  padding-bottom: 100px;
 }
 
 .alerts-header {
@@ -453,7 +452,7 @@ body * {
   display: flex;
   flex-direction: column;
   gap: 12px;
-    flex-grow: 1; /* Tells the list to expand and consume all empty space, pushing the nav down */
+  flex-grow: 1; /* Tells the list to expand and consume all empty space, pushing the nav down */
 }
 
 .alerts-card {
@@ -504,4 +503,48 @@ body * {
 .alerts-status--error {
   background: #ffe9e9;
   color: #b42318;
+}
+
+/* =========================================================
+   GLOBAL NEON HOVER EFFECTS FOR ALL BUTTONS & CARDS
+   ========================================================= */
+
+/* Ensure smooth transitions for all interactive elements (excluding .sosbutton) */
+button:not(.sosbutton),
+a,
+.panicBoxCard,
+.dropdownTrigger,
+.maps-list-item-card {
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+}
+
+/* 1. WHITE / LIGHT BUTTONS WITH BLACK/DARK LETTERS -> NEON RED TERANG */
+button:not([style*="#cc1111"]):not([style*="#d32f2f"]):not(
+    [style*="#a12b2b"]
+  ):not([style*="#700909"]):not([style*="red"]):not(
+    [style*="var(--accent)"]
+  ):not(.sosbutton):hover,
+.panicBoxCard:hover,
+.dropdownTrigger:hover,
+.maps-list-item-card:hover {
+  box-shadow:
+    0 0 15px 4px rgba(255, 0, 0, 0.8),
+    0 0 30px 8px rgba(255, 0, 0, 0.5) !important;
+  border-color: #ff0000 !important;
+  z-index: 10;
+}
+
+/* 2. RED BUTTONS WITH WHITE LETTERS -> NEON BLACK TERANG (Excluding .sosbutton) */
+button[style*="#cc1111"]:not(.sosbutton):hover,
+button[style*="#d32f2f"]:not(.sosbutton):hover,
+button[style*="#a12b2b"]:not(.sosbutton):hover,
+button[style*="#700909"]:not(.sosbutton):hover,
+button[style*="red"]:not(.sosbutton):hover,
+button[style*="var(--accent)"]:not(.sosbutton):hover,
+button[style*="linear-gradient"]:not(.sosbutton):hover {
+  box-shadow:
+    0 0 18px 6px rgba(0, 0, 0, 0.9),
+    0 0 35px 12px rgba(0, 0, 0, 0.75) !important;
+  border-color: #000000 !important;
+  z-index: 10;
 }
