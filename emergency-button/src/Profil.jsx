@@ -1,13 +1,8 @@
 import React, { useState } from "react";
 
 const Profil = () => {
-  // Main view state: 'guest' | 'profile'
   const [currentView, setCurrentView] = useState("guest");
-
-  // Pop-up modal state: 'none' | 'login' | 'signup'
-  const [modalView, setModalView] = useState("none");
-
-  // Interactive Dropdown state for Sign Up
+  const [modalView, setModalView] = useState("none"); // "login", "signup", "details", "password"
   const [showFamilyDropdown, setShowFamilyDropdown] = useState(false);
 
   // Form States
@@ -17,43 +12,127 @@ const Profil = () => {
   const [familyType, setFamilyType] = useState("Mother");
   const [familyNumber, setFamilyNumber] = useState("");
 
-  // Demo Account & Logged-in User Data
+  // Change Password States
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
   const [userData, setUserData] = useState({
     name: "Shandy Afrian Mashuri",
+    email: "shandy@gmail.com",
     emergencyContact: {
       relation: "Mom",
       number: "0812 3459 3987",
     },
   });
 
-  // Handle Login (Checks for demo account or loads default demo data)
-  const handleLogin = () => {
-    if (email === "shandy@gmail.com" || email === "") {
-      setUserData({
-        name: "Shandy Afrian Mashuri",
-        emergencyContact: {
-          relation: "Mom",
-          number: "0812 3459 3987",
-        },
+  // 1. Connect Login to Backend API
+  const handleLogin = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setUserData(data.user);
+        setCurrentView("profile");
+        setModalView("none");
+      } else {
+        alert(data.error || "Login failed. Please check your credentials.");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      alert(
+        "Cannot connect to server. Ensure your Flask backend is running on port 5000.",
+      );
     }
-    setCurrentView("profile");
-    setModalView("none");
   };
 
-  // Handle Sign Up
-  const handleSignUp = () => {
-    if (fullName && familyNumber) {
-      setUserData({
-        name: fullName,
-        emergencyContact: {
-          relation: familyType || "Family",
-          number: familyNumber,
-        },
-      });
+  // 2. Connect Sign Up to Backend API
+  const handleSignUp = async () => {
+    if (!fullName || !email || !password || !familyNumber) {
+      alert("Please fill in all required fields!");
+      return;
     }
-    setCurrentView("profile");
-    setModalView("none");
+
+    try {
+      const response = await fetch("http://localhost:5000/api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName,
+          email,
+          password,
+          familyType: familyType || "Family",
+          familyNumber,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setUserData(data.user);
+        setCurrentView("profile");
+        setModalView("none");
+        alert("Account created successfully!");
+      } else {
+        alert(data.error || "Sign up failed.");
+      }
+    } catch (error) {
+      console.error("Sign up error:", error);
+      alert(
+        "Cannot connect to server. Ensure your Flask backend is running on port 5000.",
+      );
+    }
+  };
+
+  // 3. Connect Change Password to Backend API
+  const handleChangePassword = async () => {
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      alert("Please fill in all password fields!");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      alert("New passwords do not match!");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/change-password",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: userData.email,
+            oldPassword,
+            newPassword,
+          }),
+        },
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Password updated successfully!");
+        setModalView("none");
+        setOldPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      } else {
+        alert(data.error || "Failed to change password.");
+      }
+    } catch (error) {
+      console.error("Change password error:", error);
+      alert(
+        "Cannot connect to server. Ensure your Flask backend is running on port 5000.",
+      );
+    }
   };
 
   return (
@@ -104,8 +183,19 @@ const Profil = () => {
               <span style={styles.profileName}>{userData.name}</span>
             </div>
 
-            <button style={styles.menuButton}>👤 Account Details &gt;</button>
-            <button style={styles.menuButton}>🔒 Change Password &gt;</button>
+            <button
+              style={styles.menuButton}
+              onClick={() => setModalView("details")}
+            >
+              👤 Account Details &gt;
+            </button>
+
+            <button
+              style={styles.menuButton}
+              onClick={() => setModalView("password")}
+            >
+              🔒 Change Password &gt;
+            </button>
 
             {/* Emergency Call Box */}
             <div style={styles.emergencyBox}>
@@ -144,10 +234,14 @@ const Profil = () => {
       {modalView !== "none" && (
         <div style={styles.modalOverlay}>
           <div style={styles.modalContent}>
-            {/* Close Button [X] */}
             <button
               style={styles.closeButton}
-              onClick={() => setModalView("none")}
+              onClick={() => {
+                setModalView("none");
+                setOldPassword("");
+                setNewPassword("");
+                setConfirmPassword("");
+              }}
             >
               ✕
             </button>
@@ -213,9 +307,10 @@ const Profil = () => {
                   style={styles.input}
                   type="email"
                   placeholder="Your Gmail"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
 
-                {/* --- Interactive Dropdown for Family and Siblings --- */}
                 <label style={styles.label}>Family and Siblings</label>
                 {!showFamilyDropdown ? (
                   <div
@@ -273,6 +368,8 @@ const Profil = () => {
                   style={styles.input}
                   type="password"
                   placeholder="Enter Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
 
                 <button style={styles.redButton} onClick={handleSignUp}>
@@ -285,6 +382,82 @@ const Profil = () => {
                 >
                   Already have an account?{" "}
                   <span style={styles.linkText}>Login</span>
+                </button>
+              </div>
+            )}
+
+            {/* ACCOUNT DETAILS POPUP */}
+            {modalView === "details" && (
+              <div style={styles.modalForm}>
+                <h2 style={styles.formTitle}>Account Details</h2>
+                <p style={styles.formSubtitle}>Your registered information</p>
+
+                <div style={styles.detailBox}>
+                  <label style={styles.detailLabel}>Full Name</label>
+                  <p style={styles.detailValue}>{userData.name}</p>
+
+                  <label style={styles.detailLabel}>Email (Gmail)</label>
+                  <p style={styles.detailValue}>{userData.email}</p>
+
+                  <label style={styles.detailLabel}>
+                    Emergency Contact Relation
+                  </label>
+                  <p style={styles.detailValue}>
+                    {userData.emergencyContact.relation}
+                  </p>
+
+                  <label style={styles.detailLabel}>
+                    Emergency Phone Number
+                  </label>
+                  <p style={styles.detailValue}>
+                    {userData.emergencyContact.number}
+                  </p>
+                </div>
+
+                <button
+                  style={styles.redButton}
+                  onClick={() => setModalView("none")}
+                >
+                  Close
+                </button>
+              </div>
+            )}
+
+            {/* CHANGE PASSWORD POPUP */}
+            {modalView === "password" && (
+              <div style={styles.modalForm}>
+                <h2 style={styles.formTitle}>Change Password</h2>
+                <p style={styles.formSubtitle}>Create a new secure password</p>
+
+                <label style={styles.label}>Current Password</label>
+                <input
+                  style={styles.input}
+                  type="password"
+                  placeholder="Enter old password"
+                  value={oldPassword}
+                  onChange={(e) => setOldPassword(e.target.value)}
+                />
+
+                <label style={styles.label}>New Password</label>
+                <input
+                  style={styles.input}
+                  type="password"
+                  placeholder="Enter new password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+
+                <label style={styles.label}>Confirm New Password</label>
+                <input
+                  style={styles.input}
+                  type="password"
+                  placeholder="Confirm new password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+
+                <button style={styles.redButton} onClick={handleChangePassword}>
+                  Update Password
                 </button>
               </div>
             )}
@@ -431,7 +604,6 @@ const styles = {
     boxSizing: "border-box",
     outline: "none",
   },
-  /* --- DROPDOWN STYLES --- */
   dropdownTrigger: {
     width: "100%",
     height: "42px",
@@ -594,6 +766,28 @@ const styles = {
     color: "#888",
     cursor: "pointer",
     fontWeight: "bold",
+  },
+  detailBox: {
+    width: "100%",
+    backgroundColor: "#f9f9f9",
+    border: "1px solid #ddd",
+    borderRadius: "15px",
+    padding: "15px",
+    marginBottom: "20px",
+    boxSizing: "border-box",
+  },
+  detailLabel: {
+    fontSize: "11px",
+    color: "#888",
+    textTransform: "uppercase",
+    fontWeight: "bold",
+    margin: "0 0 2px 0",
+  },
+  detailValue: {
+    fontSize: "15px",
+    color: "#000",
+    fontWeight: "bold",
+    margin: "0 0 12px 0",
   },
 };
 
